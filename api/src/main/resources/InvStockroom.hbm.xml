@@ -36,7 +36,8 @@
 		<property name="retireReason" type="java.lang.String" column="retire_reason" length="255" />
 		<property name="retired" type="boolean" column="retired" length="1" not-null="true" />
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
-	</class>
+
+    </class>
 	<class name="ItemStock" table="inv_item_stock">
 		<cache usage="read-write"/>
 

@@ -903,4 +903,20 @@
             columnName="operation_number"
             tableName="inv_stock_operation"/>
 	</changeSet>
+    <changeSet id="openhmis.inventory-v1.0.0-12" author="carol">
+        <addColumn tableName="inv_department">
+            <column name="location_id" type="int" />
+        </addColumn>
+        <addForeignKeyConstraint constraintName="inv_department_location_fk"
+                                 baseTableName="inv_department" baseColumnNames="location_id"
+                                 referencedTableName="location" referencedColumnNames="location_id"/>
+
+        <addColumn tableName="inv_institution">
+            <column name="location_id" type="int" />
+        </addColumn>
+        <addForeignKeyConstraint constraintName="inv_institution_location_fk"
+                                 baseTableName="inv_institution" baseColumnNames="location_id"
+                                 referencedTableName="location" referencedColumnNames="location_id"/>
+
+    </changeSet>
 </databaseChangeLog>

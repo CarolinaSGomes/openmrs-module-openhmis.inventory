@@ -32,5 +32,7 @@
 		          length="1" not-null="true" />
 
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
+
+        <many-to-one name="location" class="org.openmrs.Location" column="location_id" />
 	</class>
 </hibernate-mapping>

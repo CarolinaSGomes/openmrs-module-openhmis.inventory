@@ -20,7 +20,9 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Location;
 import org.openmrs.OpenmrsObject;
+import org.openmrs.User;
 import org.openmrs.api.APIException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.impl.BaseMetadataDataServiceImpl;
 import org.openmrs.module.openhmis.commons.api.entity.security.IMetadataAuthorizationPrivileges;
@@ -31,6 +33,7 @@ import org.openmrs.module.openhmis.inventory.api.search.ItemSearch;
 import org.openmrs.module.openhmis.inventory.api.search.StockOperationSearch;
 import org.openmrs.module.openhmis.inventory.api.util.HibernateCriteriaConstants;
 import org.openmrs.module.openhmis.inventory.api.util.PrivilegeConstants;
+import org.openmrs.util.RoleConstants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +43,9 @@ import java.util.List;
 public class StockroomDataServiceImpl
 		extends BaseMetadataDataServiceImpl<Stockroom>
 		implements IStockroomDataService, IMetadataAuthorizationPrivileges {
+
+    private static final String LOCATIONPROPERTY = "defaultLocation";
+
 	@Override
 	protected IMetadataAuthorizationPrivileges getPrivileges() {
 		return this;
@@ -58,19 +64,41 @@ public class StockroomDataServiceImpl
 		return results;
 	}
 
+    public void updateLocationUserCriteria(Criteria criteria) {
+
+        User user = Context.getAuthenticatedUser();
+        Location location = null;
+
+        if (user.hasRole(RoleConstants.SUPERUSER))
+            return;
+
+        try {
+            location = Context.getLocationService().getLocation(Integer.parseInt(user.getUserProperty(LOCATIONPROPERTY)));
+        } catch (Exception e) {}
+
+        if (location == null) {
+            // impossible criterion so that no results will be returned
+            criteria.add(Restrictions.isNull("creator"));
+            return;
+        }
+
+        criteria.add(Restrictions.eq("location", location));
+    }
+
 	@Override
 	public List<ItemStock> getItemsByRoom(final Stockroom stockroom, PagingInfo paging) {
 		if (stockroom == null) {
 			throw new IllegalArgumentException("The stockroom must be defined");
 		}
 
-		return executeCriteria(ItemStock.class, paging, new Action1<Criteria>() {
-			@Override
-			public void apply(Criteria criteria) {
-				criteria.createAlias("item", "i");
-				criteria.setResultTransformer(Criteria.ROOT_ENTITY);
-				criteria.add(Restrictions.eq(HibernateCriteriaConstants.STOCKROOM, stockroom));
-			}
+		return executeCriteria(ItemStock.class, paging,  new Action1<Criteria>() {
+            @Override
+            public void apply(Criteria criteria) {
+                criteria.createAlias("item", "i");
+                criteria.setResultTransformer(Criteria.ROOT_ENTITY);
+                updateLocationUserCriteria(criteria);
+                criteria.add(Restrictions.eq(HibernateCriteriaConstants.STOCKROOM, stockroom));
+            }
 		}, Order.asc("i.name"));
 	}
 
@@ -100,6 +128,7 @@ public class StockroomDataServiceImpl
 				if (search != null) {
 					search.updateCriteria(criteria);
 				}
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.or(
 						Restrictions.eq(HibernateCriteriaConstants.SOURCE, stockroom),
 						Restrictions.eq(HibernateCriteriaConstants.DESTINATION, stockroom))
@@ -127,6 +156,7 @@ public class StockroomDataServiceImpl
 		return executeCriteria(ItemStock.class, paging, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.STOCKROOM, stockroom));
 				itemSearch.updateCriteria(criteria.createCriteria("item", "i"));
 			}
@@ -143,6 +173,7 @@ public class StockroomDataServiceImpl
 		}
 
 		Criteria criteria = getRepository().createCriteria(ItemStock.class);
+        updateLocationUserCriteria(criteria);
 		criteria.add(Restrictions.eq(HibernateCriteriaConstants.STOCKROOM, stockroom));
 		criteria.add(Restrictions.eq(HibernateCriteriaConstants.ITEM, item));
 
@@ -159,6 +190,7 @@ public class StockroomDataServiceImpl
 		}
 
 		Criteria criteria = getRepository().createCriteria(ItemStockDetail.class);
+        updateLocationUserCriteria(criteria);
 		criteria.add(Restrictions.eq(HibernateCriteriaConstants.STOCKROOM, stockroom));
 		criteria.add(Restrictions.eq(HibernateCriteriaConstants.ITEM, item));
 
@@ -191,6 +223,7 @@ public class StockroomDataServiceImpl
         return executeCriteria(Stockroom.class, pagingInfo, new Action1<Criteria>() {
             @Override
             public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
                 criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location));
                 if (!includeRetired) {
                     criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
@@ -219,6 +252,7 @@ public class StockroomDataServiceImpl
         return executeCriteria(Stockroom.class, pagingInfo, new Action1<Criteria>() {
             @Override
             public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
                 criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location))
                         .add(Restrictions.ilike(HibernateCriteriaConstants.NAME, name, MatchMode.START));
 

@@ -14,13 +14,30 @@
 
 package org.openmrs.module.openhmis.inventory.api.model;
 
+import org.openmrs.Location;
 import org.openmrs.module.openhmis.commons.api.entity.model.BaseSerializableOpenmrsMetadata;
 
 public class Institution extends BaseSerializableOpenmrsMetadata {
 
     public static final long serialVersionUID = 0L;
-
+    private Location location;
     private Integer institutionId;
+
+    /**
+     * Gets the {@link org.openmrs.Location} where this institution is located.
+     * @return The institution location.
+     */
+    public Location getLocation() {
+        return location;
+    }
+
+    /**
+     * Sets the {@link org.openmrs.Location} where this institution is located.
+     * @param location The institution location.
+     */
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     @Override
     public Integer getId() {

@@ -16,6 +16,7 @@ define(
 		openhmis.url.backboneBase + 'js/openhmis',
 		openhmis.url.backboneBase + 'js/lib/i18n',
 		openhmis.url.backboneBase + 'js/model/generic',
+		openhmis.url.backboneBase + 'js/model/location',
 	],
 	function(openhmis, __) {
 		openhmis.Institution = openhmis.GenericModel.extend({
@@ -28,13 +29,30 @@ define(
 
 			schema: {
 				name: 'Text',
-				description: 'Text'
+				description: 'Text',
+				location: {
+                    type: 'LocationSelect',
+                    options: new openhmis.GenericCollection(null, {
+                        model: openhmis.Location,
+                        url: 'v1/location'
+                    }),
+                    objRef: true
+                }
 			},
 
 			validate: function(attrs, options) {
 				if (!attrs.name) return { name: __("A name is required.") };
 				return null;
 			},
+
+            parse: function(resp) {
+                if (resp) {
+                    if (resp.location && _.isObject(resp.location)) {
+                        resp.location = new openhmis.Location(resp.location);
+                    }
+                }
+                return resp;
+            },
 
 			toString: function() {
 				return this.get('name');
