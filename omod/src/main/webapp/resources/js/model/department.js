@@ -32,10 +32,7 @@ define(
 				description: 'Text',
 				location: {
                     type: 'LocationSelect',
-                	options: new openhmis.GenericCollection(null, {
-                	model: openhmis.Location,
-                	url: 'v1/location'
-                	}),
+                	options: new openhmis.GenericCollection(null, {model: openhmis.Location }),
                 	objRef: true
                 }
 			},

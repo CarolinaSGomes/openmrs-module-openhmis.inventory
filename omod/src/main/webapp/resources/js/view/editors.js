@@ -25,7 +25,8 @@ define(
             openhmis.url.backboneBase + 'js/lib/backbone-forms',
             openhmis.url.backboneBase + 'js/lib/labelOver',
             openhmis.url.backboneBase + 'js/view/editors',
-            openhmis.url.backboneBase + 'js/model/concept'
+            openhmis.url.backboneBase + 'js/model/concept',
+            openhmis.url.backboneBase + 'js/model/location'
     ],
     function ($, Backbone, _, openhmis) {
         var editors = Backbone.Form.editors;

@@ -31,7 +31,7 @@ curl(
 			openhmis.startAddEditScreen(openhmis.Institution, {
 				listView: openhmis.GenericSearchableListView,
 				searchView: openhmis.ByNameSearchView,
-				listFields: ['name', 'description']
+				listFields: ['name', 'description', 'location']
 			});
 		});
 	}
