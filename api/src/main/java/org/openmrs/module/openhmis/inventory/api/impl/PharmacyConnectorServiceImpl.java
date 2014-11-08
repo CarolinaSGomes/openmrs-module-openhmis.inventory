@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by kmridev1 on 11/7/14.
  */
-public class PharmacyConnectorServiceImpl extends BaseMetadataDataServiceImpl<Item> implements IPharmacyConnectorService {
+public class PharmacyConnectorServiceImpl extends BaseMetadataDataServiceImpl<Item> implements IPharmacyConnectorService, IMetadataAuthorizationPrivileges {
     @Override
     protected void validate(Item entity) throws APIException {
         return;

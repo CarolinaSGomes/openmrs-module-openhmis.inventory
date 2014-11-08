@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Created by kmridev1 on 11/7/14.
  */
-public interface IPharmacyConnectorService {
+public interface IPharmacyConnectorService  extends IMetadataDataService<Item> {
 
     @Transactional(readOnly =  true)
     @Authorized( {PrivilegeConstants.VIEW_ITEMS})
