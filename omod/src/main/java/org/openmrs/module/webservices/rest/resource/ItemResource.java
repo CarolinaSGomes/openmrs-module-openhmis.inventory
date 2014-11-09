@@ -65,6 +65,7 @@ public class ItemResource extends BaseRestMetadataResource<Item> {
 	        description.addProperty("hasExpiration");
 	        description.addProperty("defaultExpirationPeriod");
 	        description.addProperty("hasPhysicalInventory");
+            description.addProperty("drug", Representation.REF);
         }
 
         return description;

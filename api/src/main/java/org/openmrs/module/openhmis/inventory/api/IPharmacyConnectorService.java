@@ -34,9 +34,5 @@ public interface IPharmacyConnectorService extends IMetadataDataService<Item> {
 
     @Transactional
     @Authorized( {PrivilegeConstants.MANAGE_OPERATIONS})
-    public Boolean dispenseItem(Integer itemId, Integer quantity, String unit) throws IllegalArgumentException, APIException;
-
-    @Transactional(readOnly =  true)
-    @Authorized( {PrivilegeConstants.VIEW_ITEMS})
-    public List<String> listDispenseUnitsToItem(Integer item_id) throws APIException;
+    public Boolean dispenseItem(Integer itemId, Integer quantity) throws IllegalArgumentException, APIException;
 }

@@ -19,7 +19,8 @@ define(
 		openhmis.url.backboneBase + 'js/lib/i18n',
 		openhmis.url.inventoryBase + 'js/model/department',
         openhmis.url.inventoryBase + 'js/model/category',
-        openhmis.url.backboneBase + 'js/model/concept'
+        openhmis.url.backboneBase + 'js/model/concept',
+        openhmis.url.backboneBase + 'js/model/drug'
 	],
 	function(_, openhmis, __) {
 
@@ -120,6 +121,11 @@ define(
 				codes: { type: 'List', itemType: 'NestedModel', model: openhmis.ItemCode },
 				prices: { type: 'List', itemType: 'NestedModel', model: openhmis.ItemPrice },
 				defaultPrice: { type: 'ItemPriceSelect', options: [] },
+				drug: {
+                    type: 'ListSelect',
+                	options: new openhmis.GenericCollection(null, { model: openhmis.Drug }),
+                	objRef: true
+                }
 			},
 
 			initialize: function(attributes, options) {
@@ -224,7 +230,8 @@ define(
 					if (resp.concept && _.isObject(resp.concept)) {
 						resp.concept = new openhmis.Concept(resp.concept);
 					}
-
+                    if (resp.drug)
+                        resp.drug = new openhmis.Drug(resp.drug);
 				}
 				return resp;
 			},

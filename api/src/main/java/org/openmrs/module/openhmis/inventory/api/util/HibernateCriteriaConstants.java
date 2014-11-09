@@ -18,5 +18,6 @@ public class HibernateCriteriaConstants {
 	public static final String EXPIRATION = "expiration";
 	public static final String BATCH_OPERATION = "batchOperation";
 	public static final String LOCATION = "location";
+    public static final String DRUG = "drug";
 
 }

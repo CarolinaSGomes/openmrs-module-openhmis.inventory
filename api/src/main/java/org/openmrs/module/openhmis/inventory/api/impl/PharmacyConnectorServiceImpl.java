@@ -2,6 +2,7 @@ package org.openmrs.module.openhmis.inventory.api.impl;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
+import org.openmrs.Drug;
 import org.openmrs.Location;
 import org.openmrs.User;
 import org.openmrs.api.APIException;
@@ -56,7 +57,17 @@ public class PharmacyConnectorServiceImpl extends BaseMetadataDataServiceImpl<It
 
     @Override
     public List<Item> listItemsByDrugId(Integer drugId) throws APIException {
-        return null;
+        final Drug drug = Context.getConceptService().getDrug(drugId);
+
+        System.out.println("Drug!!! = " + drug.getDisplayName());
+
+        return executeCriteria(Item.class, new Action1<Criteria>() {
+            @Override
+            public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
+                criteria.add(Restrictions.eq(HibernateCriteriaConstants.DRUG, drug));
+            }
+        });
     }
 
     @Override
@@ -83,12 +94,7 @@ public class PharmacyConnectorServiceImpl extends BaseMetadataDataServiceImpl<It
     }
 
     @Override
-    public Boolean dispenseItem(Integer itemId, Integer quantity, String unit) throws IllegalArgumentException, APIException {
-        return null;
-    }
-
-    @Override
-    public List<String> listDispenseUnitsToItem(Integer item_id) throws APIException {
+    public Boolean dispenseItem(Integer itemId, Integer quantity) throws IllegalArgumentException, APIException {
         return null;
     }
 

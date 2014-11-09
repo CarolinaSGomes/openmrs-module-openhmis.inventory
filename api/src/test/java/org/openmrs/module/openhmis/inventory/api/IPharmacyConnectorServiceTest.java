@@ -1,5 +1,6 @@
 package org.openmrs.module.openhmis.inventory.api;
 
+import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
@@ -8,6 +9,7 @@ import org.openmrs.module.openhmis.inventory.api.model.Item;
 import org.openmrs.module.openhmis.commons.api.entity.IMetadataDataServiceTest;
 import org.openmrs.module.openhmis.inventory.api.model.ItemCode;
 import org.openmrs.module.openhmis.inventory.api.model.ItemPrice;
+import org.openmrs.Drug;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
@@ -21,6 +23,7 @@ public class IPharmacyConnectorServiceTest extends IMetadataDataServiceTest<IPha
 
     private IDepartmentDataService departmentService;
     private ICategoryDataService categoryService;
+    private static SessionFactory sessionFactory;
 
     public static final String ITEM_DATASET = TestConstants.BASE_DATASET_DIR + "ItemTest.xml";
     private int itemCount = 0;
@@ -71,6 +74,9 @@ public class IPharmacyConnectorServiceTest extends IMetadataDataServiceTest<IPha
         ItemPrice price = item.addPrice("default", BigDecimal.valueOf(100));
         item.addPrice("second", BigDecimal.valueOf(200));
         item.setDefaultPrice(price);
+
+        Drug drug = Context.getConceptService().getDrug(itemCount % 7);
+        item.setDrug(drug);
 
         itemCount++;
 
@@ -169,7 +175,14 @@ public class IPharmacyConnectorServiceTest extends IMetadataDataServiceTest<IPha
     }
 
     @Test
-    public void test_listByConceptId() throws Exception {
+    public void test_listItemsByDrugId() throws Exception {
+        List<Item> items = service.listItemsByDrugId(0);
+        Assert.assertNotNull(items);
+        Assert.assertEquals(7, items.size());
+    }
+
+    @Test
+    public void test_listItemsByConceptId() throws Exception {
         for(int i = 0; i < 2; i++) {
             Item item = createEntity(true);
             item.setName("Item " + itemCount);
@@ -184,7 +197,7 @@ public class IPharmacyConnectorServiceTest extends IMetadataDataServiceTest<IPha
 
     @Test
     public void test_listAllItems() throws Exception {
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 7; i++) {
             Item item = createEntity(true);
             item.setName("Item " + itemCount);
 

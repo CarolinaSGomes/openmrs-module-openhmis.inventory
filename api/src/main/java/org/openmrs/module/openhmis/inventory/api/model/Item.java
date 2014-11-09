@@ -18,6 +18,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.openmrs.BaseCustomizableMetadata;
 import org.openmrs.Concept;
 import org.openmrs.customdatatype.Customizable;
+import org.openmrs.Location;
+import org.openmrs.Drug;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -40,6 +42,7 @@ public class Item extends BaseCustomizableMetadata<ItemAttribute> implements Cus
 	private Integer defaultExpirationPeriod;
 	private Boolean hasPhysicalInventory;
 	private Boolean conceptAccepted;
+    private Drug drug;
 
 	public Item() {
 	}
@@ -209,6 +212,10 @@ public class Item extends BaseCustomizableMetadata<ItemAttribute> implements Cus
 	public void setConceptAccepted(Boolean conceptAccepted) {
 		this.conceptAccepted = conceptAccepted;
 	}
+
+    public Drug getDrug() { return drug; }
+
+    public void setDrug(Drug drug) { this.drug = drug; }
 
 	@Override
 	@JsonIgnore
