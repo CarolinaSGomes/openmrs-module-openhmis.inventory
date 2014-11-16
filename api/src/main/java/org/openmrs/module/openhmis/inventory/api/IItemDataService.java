@@ -32,17 +32,20 @@ import org.springframework.transaction.annotation.Transactional;
 public interface IItemDataService extends IMetadataDataService<Item> {
 
     @Transactional(readOnly =  true)
-    @Authorized( {PrivilegeConstants.VIEW_ITEMS})
+    @Authorized( {PrivilegeConstants.VIEW_ITEMS} )
     public List<Item> listItemsByDrugId(Integer drugId) throws APIException;
 
     @Transactional(readOnly =  true)
-    @Authorized( {PrivilegeConstants.VIEW_ITEMS})
+    @Authorized( {PrivilegeConstants.VIEW_ITEMS} )
     public List<Item> listItemsByConceptId(Integer conceptId) throws APIException;
 
     @Transactional(readOnly =  true)
-    @Authorized( {PrivilegeConstants.VIEW_ITEMS})
+    @Authorized( {PrivilegeConstants.VIEW_ITEMS} )
     public List<Item> listAllItems() throws APIException;
 
+    @Transactional(readOnly = true)
+    @Authorized( {PrivilegeConstants.VIEW_ITEMS} )
+    public List<Item> getItemById(final Integer itemId) throws APIException;
     @Transactional
     @Authorized( {PrivilegeConstants.MANAGE_OPERATIONS})
     public Boolean dispenseItem(Integer itemId, Integer quantity) throws IllegalArgumentException, APIException;

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Iterators;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.MatchMode;
@@ -29,10 +30,8 @@ import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.impl.BaseMetadataDataServiceImpl;
 import org.openmrs.module.openhmis.commons.api.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.openhmis.commons.api.f.Action1;
-import org.openmrs.module.openhmis.inventory.api.IItemDataService;
-import org.openmrs.module.openhmis.inventory.api.model.Category;
-import org.openmrs.module.openhmis.inventory.api.model.Department;
-import org.openmrs.module.openhmis.inventory.api.model.Item;
+import org.openmrs.module.openhmis.inventory.api.*;
+import org.openmrs.module.openhmis.inventory.api.model.*;
 import org.openmrs.module.openhmis.inventory.api.search.ItemSearch;
 import org.openmrs.module.openhmis.inventory.api.util.HibernateCriteriaConstants;
 import org.openmrs.module.openhmis.inventory.api.util.PrivilegeConstants;
@@ -120,7 +119,52 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
     }
 
     @Override
+    public List<Item> getItemById(final Integer itemId) throws APIException {
+        return executeCriteria(Item.class, new Action1<Criteria>() {
+            @Override
+            public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
+                criteria.add(Restrictions.eq(HibernateCriteriaConstants.ID, itemId));
+            }
+        });
+    }
+    @Override
     public Boolean dispenseItem(Integer itemId, Integer quantity) throws IllegalArgumentException, APIException {
+        IStockOperationTypeDataService typeService = Context.getService(IStockOperationTypeDataService.class);
+        IStockroomDataService stockroomService = Context.getService(IStockroomDataService.class);
+        IStockOperationDataService operationService = Context.getService(IStockOperationDataService.class);
+        IStockOperationService stockOpService = Context.getService(IStockOperationService.class);
+
+        // Get a stockroom: for now we only have one stockroom per location
+        //so it's OK to access directly with index 0
+        Stockroom stockroom = stockroomService.getById(0);
+        List<Item> itemList = this.getItemById(itemId);
+
+        if(itemList.size() != 1) {
+            return false;
+        }
+        Item item = this.getItemById(itemId).get(0);
+
+        // Create a new empty operation
+        StockOperation operation = new StockOperation();
+        operation.setStatus(StockOperationStatus.NEW);
+
+        // Create the transactions
+        StockOperationTransaction tx = new StockOperationTransaction();
+        tx.setItem(item);
+        tx.setStockroom(stockroom);
+        tx.setQuantity(-1 * quantity);
+        tx.setOperation(operation);
+
+        operation.addTransaction(tx);
+        operationService.save(operation);
+        stockOpService.applyTransactions(tx);
+
+        operation.setStatus(StockOperationStatus.COMPLETED);
+        operationService.save(operation);
+
+        Context.flushSession();
+
         return true;
     }
 

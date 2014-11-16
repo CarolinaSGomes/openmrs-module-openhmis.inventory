@@ -27,6 +27,7 @@ import liquibase.util.StringUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.api.ConceptService;
@@ -35,11 +36,7 @@ import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.IMetadataDataServiceTest;
 import org.openmrs.module.openhmis.commons.api.entity.search.BaseObjectTemplateSearch;
 import org.openmrs.module.openhmis.commons.api.f.Action2;
-import org.openmrs.module.openhmis.inventory.api.model.Category;
-import org.openmrs.module.openhmis.inventory.api.model.Department;
-import org.openmrs.module.openhmis.inventory.api.model.Item;
-import org.openmrs.module.openhmis.inventory.api.model.ItemCode;
-import org.openmrs.module.openhmis.inventory.api.model.ItemPrice;
+import org.openmrs.module.openhmis.inventory.api.model.*;
 import org.openmrs.module.openhmis.inventory.api.search.ItemSearch;
 
 public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataService, Item> {
@@ -295,6 +292,43 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
         List<Item> items = service.listAllItems();
         Assert.assertNotNull(items);
         Assert.assertEquals(getTestEntityCount(), items.size());
+    }
+
+    @Ignore
+    @Test
+    public void test_dispenseItem() throws Exception {
+        Item item = createEntity(true);
+        item.setName("Item " + itemCount);
+        service.save(item);
+        Context.flushSession();
+
+        IStockroomDataService stockroomService = Context.getService(IStockroomDataService.class);
+
+        Stockroom stockroom = stockroomService.getById(0);
+        ItemStock itemStock = new ItemStock();
+        itemStock.setStockroom(stockroom);
+        itemStock.setItem(item);
+        itemStock.setQuantity(20);
+
+        ItemStockDetail detail = new ItemStockDetail();
+        detail.setStockroom(stockroom);
+        detail.setItem(item);
+        detail.setCalculatedBatch(false);
+        IStockOperationDataService stockOperationDataService = Context.getService(IStockOperationDataService.class);
+        StockOperation operation0 = stockOperationDataService.getById(0);
+        detail.setBatchOperation(operation0);
+        detail.setQuantity(20);
+
+        itemStock.addDetail(detail);
+
+        IItemStockDataService itemStockService = Context.getService(IItemStockDataService.class);
+        itemStockService.save(itemStock);
+        Context.flushSession();
+
+        service.dispenseItem(item.getId(), 8);
+        List<ItemStock> stockList = itemStockService.getItemStockByItem(item, null);
+        Assert.assertEquals(1, stockList.size());
+        Assert.assertEquals(12, stockList.get(0).getQuantity());
     }
 
 	/**
