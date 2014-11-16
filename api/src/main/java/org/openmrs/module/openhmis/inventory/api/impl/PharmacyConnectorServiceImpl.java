@@ -59,8 +59,6 @@ public class PharmacyConnectorServiceImpl extends BaseMetadataDataServiceImpl<It
     public List<Item> listItemsByDrugId(Integer drugId) throws APIException {
         final Drug drug = Context.getConceptService().getDrug(drugId);
 
-        System.out.println("Drug!!! = " + drug.getDisplayName());
-
         return executeCriteria(Item.class, new Action1<Criteria>() {
             @Override
             public void apply(Criteria criteria) {

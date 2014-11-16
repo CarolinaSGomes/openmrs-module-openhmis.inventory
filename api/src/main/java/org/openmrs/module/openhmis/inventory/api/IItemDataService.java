@@ -30,7 +30,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public interface IItemDataService extends IMetadataDataService<Item> {
-	/**
+
+    @Transactional(readOnly =  true)
+    @Authorized( {PrivilegeConstants.VIEW_ITEMS})
+    public List<Item> listItemsByDrugId(Integer drugId) throws APIException;
+
+    @Transactional(readOnly =  true)
+    @Authorized( {PrivilegeConstants.VIEW_ITEMS})
+    public List<Item> listItemsByConceptId(Integer conceptId) throws APIException;
+
+    @Transactional(readOnly =  true)
+    @Authorized( {PrivilegeConstants.VIEW_ITEMS})
+    public List<Item> listAllItems() throws APIException;
+
+    @Transactional
+    @Authorized( {PrivilegeConstants.MANAGE_OPERATIONS})
+    public Boolean dispenseItem(Integer itemId, Integer quantity) throws IllegalArgumentException, APIException;
+
+
+    /**
 	 * Gets the {@link Item} with the specified code or {@code null} if not found.
 	 * @param itemCode The item code to find.
 	 * @return The {@link Item} or with the specified item code or {@code null}.

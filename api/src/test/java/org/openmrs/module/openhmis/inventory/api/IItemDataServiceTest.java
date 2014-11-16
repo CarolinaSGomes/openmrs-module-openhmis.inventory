@@ -28,6 +28,7 @@ import liquibase.util.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openmrs.Concept;
+import org.openmrs.Drug;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
@@ -47,6 +48,7 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
 	private ICategoryDataService categoryService;
 
 	public static final String ITEM_DATASET = TestConstants.BASE_DATASET_DIR + "ItemTest.xml";
+    private int itemCount = 0;
 
 	@Override
 	public void before() throws Exception {
@@ -62,7 +64,7 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
 
 	@Override
 	protected int getTestEntityCount() {
-		return 7;
+		return 7 + itemCount;
 	}
 
 	@Override
@@ -94,6 +96,11 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
 		ItemPrice price = item.addPrice("default", BigDecimal.valueOf(100));
 		item.addPrice("second", BigDecimal.valueOf(200));
 		item.setDefaultPrice(price);
+
+        Drug drug = Context.getConceptService().getDrug(itemCount % 7);
+        item.setDrug(drug);
+
+        itemCount++;
 
 		return item;
 	}
@@ -206,7 +213,7 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
 		List<Item> results = service.getAll(false);
 
 		Assert.assertNotNull(results);
-		Assert.assertEquals(getTestEntityCount() + 2, results.size());
+		Assert.assertEquals(getTestEntityCount(), results.size());
 		Assert.assertEquals(firstItem.getId(), Iterators.get(results.iterator(), 0).getId());
 		Assert.assertEquals(0, (int)Iterators.get(results.iterator(), 1).getId());
 		Assert.assertEquals(1, (int)Iterators.get(results.iterator(), 2).getId());
@@ -254,6 +261,41 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
 		results = service.getAll(false, paging);
 		Assert.assertEquals(lastItem.getId(), Iterators.getOnlyElement(results.iterator()).getId());
 	}
+
+    @Test
+    public void test_listItemsByDrugId() throws Exception {
+        List<Item> items = service.listItemsByDrugId(0);
+        Assert.assertNotNull(items);
+        Assert.assertEquals(7, items.size());
+    }
+
+    @Test
+    public void test_listItemsByConceptId() throws Exception {
+        for(int i = 0; i < 2; i++) {
+            Item item = createEntity(true);
+            item.setName("Item " + itemCount);
+
+            item = service.save(item);
+            Context.flushSession();
+        }
+        List<Item> items = service.listItemsByConceptId(Context.getConceptService().getConcept(0).getConceptId());
+        Assert.assertNotNull(items);
+        Assert.assertEquals(2, items.size());
+    }
+
+    @Test
+    public void test_listAllItems() throws Exception {
+        for(int i = 0; i < 7; i++) {
+            Item item = createEntity(true);
+            item.setName("Item " + itemCount);
+
+            item = service.save(item);
+            Context.flushSession();
+        }
+        List<Item> items = service.listAllItems();
+        Assert.assertNotNull(items);
+        Assert.assertEquals(getTestEntityCount(), items.size());
+    }
 
 	/**
 	 * @verifies throw IllegalArgumentException if the item code is null
