@@ -43,6 +43,17 @@ public class Item extends BaseCustomizableMetadata<ItemAttribute> implements Cus
 	private Boolean hasPhysicalInventory;
 	private Boolean conceptAccepted;
     private Drug drug;
+    private Location location;
+    
+    public Location getLocation()
+    {
+    	return this.location;
+    }
+    
+    public void setLocation(Location location)
+    {
+    	this.location = location;
+    }
 
 	public Item() {
 	}
