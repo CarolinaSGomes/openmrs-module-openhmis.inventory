@@ -139,7 +139,10 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 
         // Get a stockroom: for now we only have one stockroom per location
         //so it's OK to access directly with index 0
-        Stockroom stockroom = stockroomService.getById(0);
+        //1. STOCKROOMS START @ ID 1
+        //2. With several stockrooms, one per location, they are still stored in one database, hence only the first stockroom will be selected
+        List<Stockroom> stockrooms = stockroomService.getStockroomsByLocation(Context.getLocationService().getLocation(Integer.parseInt(Context.getAuthenticatedUser().getUserProperty(LOCATIONPROPERTY))), false);
+        Stockroom stockroom = stockrooms.get(1);
         List<Item> itemList = this.getItemById(itemId);
 
         if(itemList.isEmpty() == true || itemList.get(0) == null) {
