@@ -120,6 +120,18 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
     }
 
     @Override
+    public List<Item> getItemById(Integer itemId) throws APIException {
+        final Integer idToLookup = itemId;
+        return executeCriteria(Item.class, new Action1<Criteria>() {
+            @Override
+            public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
+                criteria.add(Restrictions.eq(HibernateCriteriaConstants.ID, idToLookup));
+            }
+        });
+    }
+
+    @Override
     public Boolean dispenseItem(Integer itemId, Integer quantity) throws IllegalArgumentException, APIException {
         IStockroomDataService stockroomService = Context.getService(IStockroomDataService.class);
         IStockOperationDataService operationService = Context.getService(IStockOperationDataService.class);
@@ -128,12 +140,13 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
         // Get a stockroom: for now we only have one stockroom per location
         //so it's OK to access directly with index 0
         Stockroom stockroom = stockroomService.getById(0);
-        Item item = this.getById(itemId);
+        List<Item> itemList = this.getItemById(itemId);
 
-        if(item == null) {
+        if(itemList.isEmpty() == true || itemList.get(0) == null) {
             return false;
         }
 
+        Item item = itemList.get(0);
         // Create a new empty operation
         StockOperation operation = new StockOperation();
         operation.setInstanceType(WellKnownOperationTypes.getDistribution());

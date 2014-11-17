@@ -300,7 +300,7 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
     @Test
     public void test_dispenseItem() throws Exception {
         IItemStockDataService itemStockService = Context.getService(IItemStockDataService.class);
-        Item item = service.getById(0);
+        Item item = service.getItemById(0).get(0);
 
         List<ItemStock> results = itemStockService.getItemStockByItem(item, null);
 

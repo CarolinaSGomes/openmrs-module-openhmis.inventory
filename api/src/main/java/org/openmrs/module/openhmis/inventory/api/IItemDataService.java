@@ -43,6 +43,10 @@ public interface IItemDataService extends IMetadataDataService<Item> {
     @Authorized( {PrivilegeConstants.VIEW_ITEMS} )
     public List<Item> listAllItems() throws APIException;
 
+    @Transactional(readOnly = true)
+    @Authorized( {PrivilegeConstants.VIEW_ITEMS} )
+    public List<Item> getItemById(Integer itemId) throws APIException;
+
     @Transactional
     @Authorized( {PrivilegeConstants.MANAGE_OPERATIONS})
     public Boolean dispenseItem(Integer itemId, Integer quantity) throws IllegalArgumentException, APIException;
