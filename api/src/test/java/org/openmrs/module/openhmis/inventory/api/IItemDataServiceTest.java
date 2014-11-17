@@ -54,9 +54,11 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
 		departmentService = Context.getService(IDepartmentDataService.class);
 		categoryService = Context.getService(ICategoryDataService.class);
 
+        executeDataSet(TestConstants.CORE_DATASET);
 		executeDataSet(IDepartmentDataServiceTest.DEPARTMENT_DATASET);
 		executeDataSet(ICategoryDataServiceTest.CATEGORY_DATASET);
 		executeDataSet(ITEM_DATASET);
+        executeDataSet(IStockroomDataServiceTest.DATASET);
 	}
 
 	@Override
@@ -294,41 +296,30 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
         Assert.assertEquals(getTestEntityCount(), items.size());
     }
 
-    @Ignore
+    //@Ignore
     @Test
     public void test_dispenseItem() throws Exception {
-        Item item = createEntity(true);
-        item.setName("Item " + itemCount);
-        service.save(item);
-        Context.flushSession();
-
-        IStockroomDataService stockroomService = Context.getService(IStockroomDataService.class);
-
-        Stockroom stockroom = stockroomService.getById(0);
-        ItemStock itemStock = new ItemStock();
-        itemStock.setStockroom(stockroom);
-        itemStock.setItem(item);
-        itemStock.setQuantity(20);
-
-        ItemStockDetail detail = new ItemStockDetail();
-        detail.setStockroom(stockroom);
-        detail.setItem(item);
-        detail.setCalculatedBatch(false);
-        IStockOperationDataService stockOperationDataService = Context.getService(IStockOperationDataService.class);
-        StockOperation operation0 = stockOperationDataService.getById(0);
-        detail.setBatchOperation(operation0);
-        detail.setQuantity(20);
-
-        itemStock.addDetail(detail);
-
         IItemStockDataService itemStockService = Context.getService(IItemStockDataService.class);
-        itemStockService.save(itemStock);
-        Context.flushSession();
+        Item item = service.getById(0);
 
-        service.dispenseItem(item.getId(), 8);
-        List<ItemStock> stockList = itemStockService.getItemStockByItem(item, null);
-        Assert.assertEquals(1, stockList.size());
-        Assert.assertEquals(12, stockList.get(0).getQuantity());
+        List<ItemStock> results = itemStockService.getItemStockByItem(item, null);
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+
+        ItemStock stock = Iterators.get(results.iterator(), 0);
+
+        Assert.assertEquals(4, (int)stock.getQuantity());
+
+        boolean returnVal = service.dispenseItem(item.getId(), 3);
+        Assert.assertEquals(true, returnVal);
+        List<ItemStock> results2 = itemStockService.getItemStockByItem(item, null);
+
+        Assert.assertNotNull(results2);
+        Assert.assertEquals(2, results2.size());
+
+        ItemStock stock2 = Iterators.get(results2.iterator(), 0);
+        Assert.assertEquals(1, (int)stock2.getQuantity());
     }
 
 	/**

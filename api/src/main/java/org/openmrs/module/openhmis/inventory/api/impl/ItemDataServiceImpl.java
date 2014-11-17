@@ -15,6 +15,7 @@ package org.openmrs.module.openhmis.inventory.api.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import com.google.common.collect.Iterators;
@@ -120,7 +121,6 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 
     @Override
     public Boolean dispenseItem(Integer itemId, Integer quantity) throws IllegalArgumentException, APIException {
-        IStockOperationTypeDataService typeService = Context.getService(IStockOperationTypeDataService.class);
         IStockroomDataService stockroomService = Context.getService(IStockroomDataService.class);
         IStockOperationDataService operationService = Context.getService(IStockOperationDataService.class);
         IStockOperationService stockOpService = Context.getService(IStockOperationService.class);
@@ -130,13 +130,19 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
         Stockroom stockroom = stockroomService.getById(0);
         Item item = this.getById(itemId);
 
-        if(item != null) {
+        if(item == null) {
             return false;
         }
 
         // Create a new empty operation
         StockOperation operation = new StockOperation();
-        operation.setStatus(StockOperationStatus.NEW);
+        operation.setInstanceType(WellKnownOperationTypes.getDistribution());
+        operation.setSource(stockroom);
+        operation.setOperationNumber("op by pharmacy");
+        operation.setCreator(Context.getAuthenticatedUser());
+        operation.setDateCreated(new Date());
+        operation.setOperationDate(new Date());
+        operation.setStatus(StockOperationStatus.COMPLETED);
 
         // Create the transactions
         StockOperationTransaction tx = new StockOperationTransaction();
@@ -148,9 +154,6 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
         operation.addTransaction(tx);
         operationService.save(operation);
         stockOpService.applyTransactions(tx);
-
-        operation.setStatus(StockOperationStatus.COMPLETED);
-        operationService.save(operation);
 
         Context.flushSession();
 
