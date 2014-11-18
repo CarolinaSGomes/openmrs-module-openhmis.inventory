@@ -9,6 +9,7 @@ import org.openmrs.module.openhmis.commons.api.entity.model.IInstanceType;
  * Represents classes that can act as a stock operation type.
  */
 public interface IStockOperationType extends OpenmrsMetadata, IInstanceType<StockOperationAttributeType> {
+	
 	/**
 	 * Returns whether the operation type has a source {@link Stockroom}.
 	 * @return {@code true} if the operation type has a source stockroom; otherwise, {@code false}.

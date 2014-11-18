@@ -44,58 +44,72 @@ public abstract class StockOperationTypeBase
 		this.id = id;
 	}
 
+	@Override
 	public Boolean getHasSource() {
 		return hasSource;
 	}
 
+	@Override
 	public void setHasSource(Boolean hasSource) {
 		this.hasSource = hasSource;
 	}
 
+	@Override
 	public Boolean getHasDestination() {
 		return hasDestination;
 	}
 
+	@Override
 	public void setHasDestination(Boolean hasDestination) {
 		this.hasDestination = hasDestination;
 	}
 
+	@Override
 	public Boolean getHasRecipient() {
 		return hasRecipient;
 	}
 
+	@Override
 	public void setHasRecipient(Boolean hasPatient) {
 		this.hasRecipient = hasPatient;
 	}
 
+	@Override
 	public Boolean getRecipientRequired() {
 		return recipientRequired;
 	}
 
+	@Override
 	public void setRecipientRequired(Boolean recipientRequired) {
 		this.recipientRequired = recipientRequired;
 	}
 
+	@Override
 	public Boolean getAvailableWhenReserved() {
 		return availableWhenReserved;
 	}
 
+	@Override
 	public void setAvailableWhenReserved(Boolean availableInTransit) {
 		this.availableWhenReserved = availableInTransit;
 	}
 
+	@Override
 	public User getUser() {
 		return user;
 	}
 
+	@Override
 	public void setUser(User user) {
 		this.user = user;
 	}
 
+	@Override
 	public Role getRole() {
 		return role;
 	}
 
+	@Override
 	public void setRole(Role role) {
 		this.role = role;
 	}

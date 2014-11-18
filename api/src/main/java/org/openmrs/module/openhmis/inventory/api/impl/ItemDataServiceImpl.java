@@ -39,6 +39,9 @@ import org.openmrs.module.openhmis.inventory.api.util.PrivilegeConstants;
 import org.openmrs.util.RoleConstants;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.openmrs.notification.Alert;
+import org.openmrs.api.UserService;
+
 @Transactional
 public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		implements IItemDataService, IMetadataAuthorizationPrivileges {
@@ -170,7 +173,15 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
         operation.addTransaction(tx);
         operationService.save(operation);
         stockOpService.applyTransactions(tx);
+        
 
+		Alert alert = new Alert();
+		alert.setText("Test items stock is below 40");
+        UserService us = Context.getUserService();
+        List<User> users = us.getUsersByRole(new Role("Inventory Manager"));
+		for (User user : users)
+			alert.addRecipient(user);
+		Context.getAlertService().saveAlert(alert);
         Context.flushSession();
 
         return true;
