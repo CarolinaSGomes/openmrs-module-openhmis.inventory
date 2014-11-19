@@ -173,7 +173,6 @@ public class StockroomDataServiceImpl
 		}
 
 		Criteria criteria = getRepository().createCriteria(ItemStock.class);
-        updateLocationUserCriteria(criteria);
 		criteria.add(Restrictions.eq(HibernateCriteriaConstants.STOCKROOM, stockroom));
 		criteria.add(Restrictions.eq(HibernateCriteriaConstants.ITEM, item));
 
