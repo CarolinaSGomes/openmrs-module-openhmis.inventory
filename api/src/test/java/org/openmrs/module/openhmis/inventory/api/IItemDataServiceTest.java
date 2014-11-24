@@ -319,6 +319,7 @@ public class IItemDataServiceTest extends IMetadataDataServiceTest<IItemDataServ
         Assert.assertEquals(2, results2.size());
 
         ItemStock stock2 = Iterators.get(results2.iterator(), 0);
+
         Assert.assertEquals(1, (int)stock2.getQuantity());
     }
 
