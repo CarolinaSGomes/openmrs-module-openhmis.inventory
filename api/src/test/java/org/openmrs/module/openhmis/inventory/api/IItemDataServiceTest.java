@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.Ignore;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
+import org.openmrs.Location;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;

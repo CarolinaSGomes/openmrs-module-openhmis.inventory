@@ -18,9 +18,44 @@ import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.openhmis.commons.api.entity.search.BaseMetadataTemplateSearch;
 import org.openmrs.module.openhmis.inventory.api.model.Item;
 
+import org.openmrs.api.UserService;
+import org.openmrs.api.context.Context;
+import org.openmrs.util.RoleConstants;
+import org.openmrs.User;
+import org.apache.log4j.Logger;
+import org.openmrs.Location;
+
 public class ItemSearch extends BaseMetadataTemplateSearch<Item> {
 	public static final long serialVersionUID = 0L;
 
+    private static final String LOCATIONPROPERTY = "defaultLocation";
+	private static final Logger logger = Logger.getLogger(ItemSearch.class);
+
+    // Method for determining user location
+    public void updateLocationUserCriteria(Criteria criteria) {
+    	logger.warn("UPDATING LOCATION RESTRICTION");
+        User user = Context.getAuthenticatedUser();
+        if (user.hasRole(RoleConstants.SUPERUSER))
+            return;
+        
+        Location location = null;
+        try {
+            location = Context.getLocationService().getLocation(Integer.parseInt(user.getUserProperty(LOCATIONPROPERTY)));
+        } catch (Exception e) {
+        	logger.warn("COULD NOT RESTRICT BY LOCATION");
+        }
+
+        if (location == null) {
+            // impossible criterion so that no results will be returned
+        	logger.warn("APPLYING IMPOSSIBLE LOCATION RESTRICTION...");
+            criteria.add(Restrictions.isNull("creator"));
+            return;
+        }
+        logger.warn("APPLYING LOCATION RESTRICTION " + location.getName() + "...");
+        criteria.add(Restrictions.eq("location", location));
+        logger.warn("SUCCESS!");
+    }
+	
 	public ItemSearch() {
 		this(new Item(), StringComparisonType.EQUAL, false);
 	}
@@ -71,6 +106,8 @@ public class ItemSearch extends BaseMetadataTemplateSearch<Item> {
 		if (item.getConceptAccepted() != null) {
 			criteria.add(Restrictions.eq("conceptAccepted", item.getConceptAccepted()));
 		}
+		//Finally ensure that the location restriction is applied
+        updateLocationUserCriteria(criteria);
 	}
 }
 

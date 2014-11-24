@@ -38,6 +38,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import org.apache.log4j.Logger;
 
 @Component
 public class ItemSearchHandler
@@ -57,6 +58,9 @@ public class ItemSearchHandler
 	private IItemDataService service;
 	private IDepartmentDataService departmentService;
 	private ICategoryDataService categoryService;
+	
+
+	private static final Logger logger = Logger.getLogger(ItemSearchHandler.class);
 
 	@Autowired
 	public ItemSearchHandler(IItemDataService service, IDepartmentDataService departmentService,
@@ -70,6 +74,7 @@ public class ItemSearchHandler
 	public PageableResult search(RequestContext context) throws ResponseException {
 		String query = context.getParameter("q");
 		query = query.isEmpty() ? null : query;
+    	logger.warn("Inside search handler");
 
 		String hasPhysicalInventoryString = context.getParameter("has_physical_inventory");
 		Boolean hasPhysicalInventory = null;
@@ -91,7 +96,7 @@ public class ItemSearchHandler
 			}
 
 			if (items == null || items.size() == 0) {
-				// If no items are found, search by name
+				//If no items are found, search by name
 				items = service.getByNameFragment(query, context.getIncludeAll(), pagingInfo);
 			}
 		} else {
@@ -108,6 +113,7 @@ public class ItemSearchHandler
 	private ItemSearch createSearchTemplate(RequestContext context, String name, Department department,Category category,
 			Boolean hasPhysicalInventory) {
 		ItemSearch template = new ItemSearch();
+    	logger.warn("Inside search handler");
 
 		if (!StringUtils.isEmpty(name)) {
 			template.setNameComparisonType(BaseObjectTemplateSearch.StringComparisonType.LIKE);

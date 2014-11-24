@@ -77,8 +77,12 @@ public class DepartmentDataServiceImpl
         if (location == null) {
             return new LinkedList<Department>();
         }
-
-        return super.getAll(b, pagingInfo);
+        List<Department> departments = super.getAll(b, pagingInfo);
+        List<Department> result = new LinkedList<Department>();
+        for (Department d : departments)
+        	if (d.getLocation() == location)
+        		result.add(d);
+        return result;
     }
 
     @Override

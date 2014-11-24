@@ -20,7 +20,8 @@ define(
 		openhmis.url.inventoryBase + 'js/model/department',
         openhmis.url.inventoryBase + 'js/model/category',
         openhmis.url.backboneBase + 'js/model/concept',
-        openhmis.url.backboneBase + 'js/model/drug'
+        openhmis.url.backboneBase + 'js/model/drug',
+		openhmis.url.backboneBase + 'js/model/location'
 	],
 	function(_, openhmis, __) {
 
@@ -125,7 +126,12 @@ define(
                     type: 'ListSelect',
                 	options: new openhmis.GenericCollection(null, { model: openhmis.Drug }),
                 	objRef: true
-                }
+                },
+                location: {
+					type: 'LocationSelect',
+					options: new openhmis.GenericCollection(null, { model: openhmis.Location }),
+					objRef: true
+				}
 			},
 
 			initialize: function(attributes, options) {
@@ -232,6 +238,8 @@ define(
 					}
                     if (resp.drug)
                         resp.drug = new openhmis.Drug(resp.drug);
+                    if (resp.location)
+						resp.location = new openhmis.Location(resp.location);
 				}
 				return resp;
 			},

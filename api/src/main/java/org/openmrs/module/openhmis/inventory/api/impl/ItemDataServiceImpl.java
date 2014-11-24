@@ -41,12 +41,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.openmrs.notification.Alert;
 import org.openmrs.api.UserService;
+import org.apache.log4j.Logger;
+import org.openmrs.Location;
 
 @Transactional
 public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		implements IItemDataService, IMetadataAuthorizationPrivileges {
 
     private static final String LOCATIONPROPERTY = "defaultLocation";
+	private static final Logger logger = Logger.getLogger(ItemDataServiceImpl.class);
 
 	@Override
 	protected void validate(Item entity) throws APIException {
@@ -66,24 +69,31 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 
     // Method for determining user location
     public void updateLocationUserCriteria(Criteria criteria) {
-
+    	logger.warn("UPDATING LOCATION RESTRICTION");
         User user = Context.getAuthenticatedUser();
-        Location location = null;
-
         if (user.hasRole(RoleConstants.SUPERUSER))
+        {	
+        	logger.warn("BYPASSING FOR SUPERUSER");
             return;
-
+        }
+        
+        Location location = null;
         try {
             location = Context.getLocationService().getLocation(Integer.parseInt(user.getUserProperty(LOCATIONPROPERTY)));
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        	logger.warn("COULD NOT RESTRICT BY LOCATION");
+        }
 
         if (location == null) {
             // impossible criterion so that no results will be returned
+        	logger.warn("APPLYING IMPOSSIBLE LOCATION RESTRICTION...");
             criteria.add(Restrictions.isNull("creator"));
             return;
         }
-
-        criteria.add(Restrictions.eq("location", location));
+        logger.warn("APPLYING LOCATION RESTRICTION " + location.getName() + "...");
+        criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location));
+        logger.warn("SUCCESS!");
+        //if (!Context.getAuthenticatedUser().hasRole(RoleConstants.SUPERUSER)) {	criteria.add(Restrictions.eq("location", Context.getLocationService().getLocation(Integer.parseInt(user.getUserProperty("defaultLocation")))));	}
     }
 
     @Override
@@ -216,6 +226,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		}
 
 		Criteria criteria = getRepository().createCriteria(getEntityClass());
+        updateLocationUserCriteria(criteria);
 		criteria.createAlias("codes", "c").add(
 				Restrictions.ilike("c.code", itemCode));
 
@@ -243,6 +254,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.createAlias("codes", "c").add(
 						Restrictions.eq("c.code", itemCode));
 				if (!includeRetired) {
@@ -273,6 +285,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.DEPARTMENT, department));
 				if (!includeRetired) {
 					criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
@@ -302,6 +315,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.CATEGORY, category));
 				if (!includeRetired) {
 					criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
@@ -332,6 +346,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.DEPARTMENT, department));
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.CATEGORY, category));
 				if (!includeRetired) {
@@ -365,6 +380,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.CATEGORY, category)).add(
 						Restrictions.ilike(HibernateCriteriaConstants.NAME, name, MatchMode.START));
 
@@ -403,6 +419,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.DEPARTMENT, department))
 						.add(Restrictions.eq(HibernateCriteriaConstants.CATEGORY, category))
 						.add(Restrictions.ilike(HibernateCriteriaConstants.NAME, name, MatchMode.START));
@@ -442,6 +459,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.DEPARTMENT, department)).add(
 						Restrictions.ilike(HibernateCriteriaConstants.NAME, name, MatchMode.START));
 
@@ -471,6 +489,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				itemSearch.updateCriteria(criteria);
 			}
 		}, getDefaultSort());
@@ -481,6 +500,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.CONCEPT, concept));
 			}
 		});
@@ -491,6 +511,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return executeCriteria(Item.class, null, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
+                updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.isNull(HibernateCriteriaConstants.CONCEPT)).add(
 						Restrictions.eq(HibernateCriteriaConstants.RETIRED, false)).add(
 						Restrictions.eq(HibernateCriteriaConstants.CONCEPT_ACCEPTED, false));
