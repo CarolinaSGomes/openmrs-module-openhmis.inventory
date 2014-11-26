@@ -39,6 +39,7 @@ import org.openmrs.module.openhmis.inventory.api.util.PrivilegeConstants;
 import org.openmrs.util.RoleConstants;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.openmrs.module.openhmis.commons.api.util.PrivilegeUtil;
 import org.openmrs.notification.Alert;
 import org.openmrs.api.UserService;
 import org.apache.log4j.Logger;
@@ -56,6 +57,25 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 		return;
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<Item> getAll(final boolean includeRetired, PagingInfo pagingInfo) {
+		IMetadataAuthorizationPrivileges privileges = getPrivileges();
+		if (privileges != null && !StringUtils.isEmpty(privileges.getGetPrivilege())) {
+			PrivilegeUtil.hasPrivileges(Context.getAuthenticatedUser(), privileges.getGetPrivilege());
+		}
+		
+		return executeCriteria(getEntityClass(), pagingInfo, new Action1<Criteria>() {
+			@Override
+			public void apply(Criteria criteria) {
+	            updateLocationUserCriteria(criteria);
+				if (!includeRetired) {
+					criteria.add(Restrictions.eq("retired", false));
+				}
+			}
+		}, getDefaultSort());
+	}
+	
 	@Override
 	protected Collection<? extends OpenmrsObject> getRelatedObjects(Item entity) {
 		ArrayList<OpenmrsObject> results = new ArrayList<OpenmrsObject>();
