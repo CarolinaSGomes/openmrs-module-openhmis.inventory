@@ -75,6 +75,41 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
 			}
 		}, getDefaultSort());
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Item> getByNameFragment(String nameFragment, boolean includeRetired) {
+		return getByNameFragment(nameFragment, includeRetired, null);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<Item> getByNameFragment(final String nameFragment, final boolean includeRetired, PagingInfo pagingInfo)
+	{
+		IMetadataAuthorizationPrivileges privileges = getPrivileges();
+		if (privileges != null && !StringUtils.isEmpty(privileges.getGetPrivilege())) {
+			PrivilegeUtil.hasPrivileges(Context.getAuthenticatedUser(), privileges.getGetPrivilege());
+		}
+		
+		if (StringUtils.isEmpty(nameFragment)) {
+			throw new IllegalArgumentException("The name fragment must be defined.");
+		}
+		if (nameFragment.length() > NAME_LENGTH) {
+			throw new IllegalArgumentException("the name fragment must be less than 256 characters long.");
+		}
+		
+		return executeCriteria(getEntityClass(), pagingInfo, new Action1<Criteria>() {
+			@Override
+			public void apply(Criteria criteria) {
+	            updateLocationUserCriteria(criteria);
+				criteria.add(Restrictions.ilike("name", nameFragment, MatchMode.START));
+				
+				if (!includeRetired) {
+					criteria.add(Restrictions.eq("retired", false));
+				}
+			}
+		}, getDefaultSort());
+	}
 	
 	@Override
 	protected Collection<? extends OpenmrsObject> getRelatedObjects(Item entity) {
