@@ -26,6 +26,16 @@
     </div>
 </script>
 
+<script id="drugInput" type="text/template">
+    <div id="drugLink"></div>
+    <div id="drugMessage"></div>
+    <div id="drugBox">
+        <input type="text" id="drugDisplay" value="" class="drug-display" placeholder="Enter drug concept"/>
+        <input type="hidden" id="drug" name="drug" value="" class="drug"/>
+        <div class="spinner spinner-align"></div>
+    </div>
+</script>
+
 <script id="itemstock-autocomplete-editor" type="text/template">
     <? var department_uuid = department ? department.id : null ?>
     <select id="<?= cid ?>department" class="department">

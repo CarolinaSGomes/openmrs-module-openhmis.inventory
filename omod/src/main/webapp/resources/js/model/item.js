@@ -122,11 +122,12 @@ define(
 				codes: { type: 'List', itemType: 'NestedModel', model: openhmis.ItemCode },
 				prices: { type: 'List', itemType: 'NestedModel', model: openhmis.ItemPrice },
 				defaultPrice: { type: 'ItemPriceSelect', options: [] },
-				drug: {
+				/*drug: {
                     type: 'ListSelect',
                 	options: new openhmis.GenericCollection(null, { model: openhmis.Drug }),
                 	objRef: true
-                },
+                },*/
+				drug: { type: 'DrugInput'},
                 location: {
 					type: 'LocationSelect',
 					options: new openhmis.GenericCollection(null, { model: openhmis.Location }),

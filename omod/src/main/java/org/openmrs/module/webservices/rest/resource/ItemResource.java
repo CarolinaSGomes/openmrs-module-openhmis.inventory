@@ -18,6 +18,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Drug;
 import org.openmrs.Concept;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
@@ -111,6 +112,23 @@ public class ItemResource extends BaseRestMetadataResource<Item> {
         ConceptService conceptService = Context.getConceptService();
         Concept concept = conceptService.getConceptByUuid(uuid);
         instance.setConcept(concept);
+
+    }
+    
+    @PropertySetter(value="drug")
+    public void setDrug(Item instance, final String uuid) {
+        if(StringUtils.isBlank(uuid)) {
+            instance.setDrug(null);
+            return;
+        }
+
+        if (instance.getDrug() != null && uuid.equals(instance.getDrug().getUuid())) {
+            return;
+        }
+
+        ConceptService conceptService = Context.getConceptService();
+        Drug drug = conceptService.getDrugByUuid(uuid);
+        instance.setDrug(drug);
 
     }
 

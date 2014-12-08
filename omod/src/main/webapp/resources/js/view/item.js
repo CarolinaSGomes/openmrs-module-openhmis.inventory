@@ -25,6 +25,7 @@ define(
                 _.bindAll(this);
                 this.events = _.extend({}, this.events, {
                     'click [data-action="remove-concept"]' : 'onRemove',
+                    'click [data-action="remove-drug"]' : 'onRemove',
                     'change [name="hasExpiration"]' : 'showDefaultExpirationPeriodField'
                 });
                 openhmis.GenericAddEditView.prototype.initialize.call(this, options);
@@ -77,6 +78,12 @@ define(
                 $('#conceptMessage').hide();
                 $('#conceptBox').show();
                 this.modelForm.fields.concept.editor.value = '';
+                
+                //adding drug concept handling
+                $('#drugLink').hide();
+                $('#drugMessage').hide();
+                $('#drugBox').show();
+                this.modelForm.fields.drug.editor.value = '';
             },
             
             edit: function(model) {
@@ -96,6 +103,15 @@ define(
 		                     $('#conceptLink').append('<button type="button" data-action="remove-concept" class="bbf-remove" title="Remove">×</button>' +
 	                    				'<a href="/openmrs/module/openhmis/backboneforms/concept.form?conceptUuid=' + 
 	                    				concept.attributes.uuid +'" target="_blank">' + concept.attributes.display +'</a>');
+		                }
+						
+						//Adding drug concept handling
+						if (model.attributes.drug != null) {
+							var drug = model.attributes.drug;
+		                     $('#drugBox').hide();
+		                     $('#drugLink').append('<button type="button" data-action="remove-drug" class="bbf-remove" title="Remove">×</button>' +
+	                    				'<a href="/openmrs/module/openhmis/backboneforms/drug.form?drugUuid=' + 
+	                    				drug.attributes.uuid +'" target="_blank">' + drug.attributes.display +'</a>');
 		                }
 		                
 						$(self.formEl).show();
@@ -134,6 +150,14 @@ define(
                 } else {
                     this.modelForm.fields.concept.editor.value = this.$('#concept').val();
                 }
+                
+                //handling drug concept save
+                if(this.modelForm.fields.drug.editor.value && _.isObject(this.modelForm.fields.drug.editor.value)) {
+                    this.modelForm.fields.drug.editor.value = this.modelForm.fields.drug.editor.value.id
+                } else {
+                    this.modelForm.fields.drug.editor.value = this.$('#drug').val();
+                }
+                
                 openhmis.GenericAddEditView.prototype.save.call(this, event);
             },
             
