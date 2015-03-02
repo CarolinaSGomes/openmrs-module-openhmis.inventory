@@ -26,9 +26,9 @@
 	}
 </script>
 
-<h2>
+<!--<h2>
 	<spring:message code="openhmis.inventory.admin.settings" />
-</h2>
+</h2> -->
 
 <form:form method="POST" modelAttribute="settings">
 	<table><tr><td>
