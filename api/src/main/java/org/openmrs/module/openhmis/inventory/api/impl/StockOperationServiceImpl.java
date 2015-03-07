@@ -77,7 +77,6 @@ public class StockOperationServiceImpl
 			Submitting the operation will copy the items to the operation reservations (if not already done) and then
 			process those reservations based on the operation state.
 		 */
-
 		validateOperation(operation);
 
 		if (operation.getItems() == null || operation.getItems().size() <= 0) {
@@ -186,9 +185,8 @@ public class StockOperationServiceImpl
 						}
 					}
 
-					// If the detail quantity is zero then remove the record. Note, details with quantities less than zero
-					//      still need to be tracked.
-					if(detail.getQuantity() == 0) {
+					// If the detail quantity is zero or less then remove the record.
+					if(detail.getQuantity() <= 0) {
 						stock.getDetails().remove(detail);
 					}
 				}
@@ -196,17 +194,11 @@ public class StockOperationServiceImpl
 				// Update the item quantity
 				stock.setQuantity(stock.getQuantity() + totalQty);
 
-				// Handle the special-case where the stock quantity is negative and ensure that there is only a single
-				//  detail with no qualifiers and the negative quantity
-				if (stock.getQuantity() < 0) {
-					createNegativeStockDetail(stock);
-				}
-
-				if (stock.getQuantity() == 0) {
-					// Remove the stock if the quantity is zero
+				if (stock.getQuantity() <= 0) {
+					// Remove the stock if the quantity is zero or negative
 					itemStockService.purge(stock);
 				} else {
-					// Save the stock if the quantity is something other than zero (positive or negative)
+					// Save the stock if the quantity is positive
 					itemStockService.save(stock);
 				}
 			}

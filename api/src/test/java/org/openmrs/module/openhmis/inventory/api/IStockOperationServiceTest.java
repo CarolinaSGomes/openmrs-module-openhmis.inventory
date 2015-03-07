@@ -256,17 +256,18 @@ public class IStockOperationServiceTest extends BaseModuleContextSensitiveTest {
 		if (operation.getTransactions() != null) operation.getTransactions().clear();
 		if (operation.getReserved() != null) operation.getReserved().clear();
 		operation.setStatus(StockOperationStatus.COMPLETED);
+        operation.setInstanceType(WellKnownOperationTypes.getAdjustment());
 
 		// Create the transactions
 		StockOperationTransaction tx = new StockOperationTransaction();
 		tx.setItem(item);
 		tx.setStockroom(stockroom);
-		tx.setQuantity(-10);
+		tx.setQuantity(10);
 		tx.setOperation(operation);
 		StockOperationTransaction tx2 = new StockOperationTransaction();
 		tx2.setItem(item2);
 		tx2.setStockroom(stockroom);
-		tx2.setQuantity(-20);
+		tx2.setQuantity(20);
 		tx2.setOperation(operation);
 
 		operation.addTransaction(tx);
@@ -279,28 +280,10 @@ public class IStockOperationServiceTest extends BaseModuleContextSensitiveTest {
 		// Check that the stockroom now has the item stock with negative qty
 		stockroom = stockroomService.getById(0);
 		ItemStock stock = stockroomService.getItem(stockroom, item);
-		Assert.assertNotNull(stock);
-		Assert.assertEquals(item, stock.getItem());
-		Assert.assertEquals(-10, stock.getQuantity());
-
-		ItemStockDetail detail = Iterators.get(stock.getDetails().iterator(), 0);
-		Assert.assertEquals(item, detail.getItem());
-		Assert.assertNull(detail.getExpiration());
-		Assert.assertEquals(-10, (int)detail.getQuantity());
-		Assert.assertNull(detail.getBatchOperation());
-		Assert.assertEquals(stock, detail.getItemStock());
+		Assert.assertNull(stock);
 
 		stock = stockroomService.getItem(stockroom, item2);
-		Assert.assertNotNull(stock);
-		Assert.assertEquals(item2, stock.getItem());
-		Assert.assertEquals(-20, stock.getQuantity());
-
-		detail = Iterators.get(stock.getDetails().iterator(), 0);
-		Assert.assertEquals(item2, detail.getItem());
-		Assert.assertNull(detail.getExpiration());
-		Assert.assertEquals(-20, (int)detail.getQuantity());
-		Assert.assertNull(detail.getBatchOperation());
-		Assert.assertEquals(stock, detail.getItemStock());
+		Assert.assertNull(stock);
 	}
 
 	/**
@@ -450,29 +433,10 @@ public class IStockOperationServiceTest extends BaseModuleContextSensitiveTest {
 		// Check that the stockroom still has these item stock
 		stockroom = stockroomService.getById(0);
 		stock = stockroomService.getItem(stockroom, item);
-		Assert.assertNotNull(stock);
-		Assert.assertEquals(-10, stock.getQuantity());
-
-		// Check that there is a single detail with no qualifiers
-		Assert.assertNotNull(stock.getDetails());
-		Assert.assertEquals(1, stock.getDetails().size());
-		ItemStockDetail detail = Iterators.get(stock.getDetails().iterator(), 0);
-		Assert.assertNotNull(detail);
-		Assert.assertNull(detail.getExpiration());
-		Assert.assertNull(detail.getBatchOperation());
-		Assert.assertEquals(-10, (int)detail.getQuantity());
+		Assert.assertNull(stock);
 
 		stock = stockroomService.getItem(stockroom, item2);
-		Assert.assertNotNull(stock);
-		Assert.assertEquals(-20, stock.getQuantity());
-
-		Assert.assertNotNull(stock.getDetails());
-		Assert.assertEquals(1, stock.getDetails().size());
-		detail = Iterators.get(stock.getDetails().iterator(), 0);
-		Assert.assertNotNull(detail);
-		Assert.assertNull(detail.getExpiration());
-		Assert.assertNull(detail.getBatchOperation());
-		Assert.assertEquals(-20, (int)detail.getQuantity());
+		Assert.assertNull(stock);
 	}
 
 	/**
@@ -501,7 +465,7 @@ public class IStockOperationServiceTest extends BaseModuleContextSensitiveTest {
 		StockOperation operation = operationTest.createEntity(true);
 		if (operation.getTransactions() != null) operation.getTransactions().clear();
 		if (operation.getReserved() != null) operation.getReserved().clear();
-		operation.setInstanceType(WellKnownOperationTypes.getDistribution());
+		operation.setInstanceType(WellKnownOperationTypes.getAdjustment());
 		operation.setStatus(StockOperationStatus.COMPLETED);
 		operation.setSource(stockroom);
 
@@ -561,7 +525,7 @@ public class IStockOperationServiceTest extends BaseModuleContextSensitiveTest {
 		StockOperation operation = operationTest.createEntity(true);
 		if (operation.getTransactions() != null) operation.getTransactions().clear();
 		if (operation.getReserved() != null) operation.getReserved().clear();
-		operation.setInstanceType(WellKnownOperationTypes.getDistribution());
+		operation.setInstanceType(WellKnownOperationTypes.getAdjustment());
 		operation.setStatus(StockOperationStatus.COMPLETED);
 		operation.setSource(stockroom);
 

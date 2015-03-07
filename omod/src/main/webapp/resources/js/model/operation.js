@@ -342,16 +342,18 @@ define(
                         selectParent: true
                     });
                 } else  {
+                     var operationType = this.get("instanceType");
                      var itemError = false;
                      items.each(function(item) {
-                     	if (item.get("quantity") === 0) {
+                     	if (item.get("quantity") === 0 || (item.get("quantity") < 0 &&
+                     	operationType.get("name") != "Adjustment")) {
                      		itemError = true;
                      	}
                      });
                      if (itemError) {
                      	errors.push({
                              selector: "th.field-quantity",
-                             message: "The item quantity must not be 0"
+                             message: "The item quantity is not allowed for this operation"
                          });
                      }
                 }
