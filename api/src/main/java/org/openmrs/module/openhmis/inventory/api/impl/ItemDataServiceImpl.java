@@ -204,14 +204,13 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
         IStockroomDataService stockroomService = Context.getService(IStockroomDataService.class);
         IStockOperationDataService operationService = Context.getService(IStockOperationDataService.class);
         IStockOperationService stockOpService = Context.getService(IStockOperationService.class);
-        IItemStockDataService itemStockDataService = Context.getService(IItemStockDataService.class);
 
         // Get a stockroom: for now we only have one stockroom per location
         //so it's OK to access directly with index 0
         //1. STOCKROOMS START @ ID 1
         //2. With several stockrooms, one per location, they are still stored in one database, hence only the first stockroom will be selected
         String location = Context.getAuthenticatedUser().getUserProperty(LOCATIONPROPERTY);
-        System.out.println("location = " + location);
+
         Location loc = Context.getLocationService().getDefaultLocation();
         if(location.isEmpty() == false && StringUtils.isNumeric(location)) {
             loc = Context.getLocationService().getLocation(Integer.parseInt(location));
@@ -246,23 +245,7 @@ public class ItemDataServiceImpl extends BaseMetadataDataServiceImpl<Item>
         operation.addTransaction(tx);
         operationService.save(operation);
         stockOpService.applyTransactions(tx);
-        try
-        {
-	        ItemStock itemStock = itemStockDataService.getItemStockByItem(item, null).get(0);
-	        if (itemStock.getQuantity() < 40)
-	        {
-		        //Create an Alert
-				Alert alert = new Alert();
-				alert.setText(itemStock.getItem().getName() + " stock is below 40!");
-		        UserService us = Context.getUserService();
-		        List<User> users = us.getUsersByRole(new Role("Inventory Manager"));
-				for (User user : users)
-					alert.addRecipient(user);
-				Context.getAlertService().saveAlert(alert);
-	        }
-        }
-        catch (Exception e)
-        {}
+
         Context.flushSession();
         return true;
     }
