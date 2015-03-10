@@ -1,7 +1,9 @@
 package org.openmrs.module.openhmis.inventory.web.controller;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonGenerationException;
@@ -16,6 +18,7 @@ import org.openmrs.module.openhmis.inventory.api.*;
 import org.openmrs.module.openhmis.inventory.api.impl.ItemDataServiceImpl;
 import org.openmrs.module.openhmis.inventory.api.model.Item;
 import org.openmrs.module.openhmis.inventory.api.model.ItemStock;
+import org.openmrs.module.openhmis.inventory.api.model.ItemStockDetail;
 import org.openmrs.module.openhmis.inventory.api.model.Stockroom;
 import org.openmrs.module.openhmis.inventory.web.ModuleWebConstants;
 import org.openmrs.notification.Alert;
@@ -27,8 +30,32 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping(ModuleWebConstants.INVENTORY_ROOT)
 public class InventoryPageController {
-    private static final String LOCATIONPROPERTY = "defaultLocation";
     private final int ITEM_STOCK_LIMIT = 40;
+    private final Date EXPIRY_PERIOD = new Date(0, 0, 60);
+
+    private void setupAlertsForItem(String itemName, String msg) {
+        UserService us = Context.getUserService();
+        List<User> users = us.getUsersByRole(new Role("Inventory Manager"));
+        for (User user : users) {
+            List<Alert> alertList = Context.getAlertService().getAlertsByUser(user);
+            boolean repeatedAlert = false;
+
+            for(Alert alert : alertList) {
+                if(alert.getText().contains(itemName) == true) {
+                    repeatedAlert = true;
+                    break;
+                }
+            }
+
+            if(repeatedAlert == false) {
+                //Create an Alert
+                Alert newAlert = new Alert();
+                newAlert.setText(msg);
+                newAlert.addRecipient(user);
+                Context.getAlertService().saveAlert(newAlert);
+            }
+        }
+    }
 
 	@RequestMapping(method = RequestMethod.GET)
 	public void inventory(ModelMap model) throws JsonGenerationException, JsonMappingException, IOException {
@@ -38,36 +65,36 @@ public class InventoryPageController {
         IItemStockDataService itemStockDataService = Context.getService(IItemStockDataService.class);
         IItemDataService itemDataService = Context.getService(IItemDataService.class);
 
-        List<Item> itemList = itemDataService.getAll();
+        List<Item> itemList = itemDataService.listAllItems();
 
         for(Item item : itemList) {
             try
             {
-                ItemStock itemStock = itemStockDataService.getItemStockByItem(item, null).get(0);
-                if (itemStock == null || itemStock.getQuantity() < ITEM_STOCK_LIMIT)
-                {
-                    String itemName = item.getName();
-                    UserService us = Context.getUserService();
-                    List<User> users = us.getUsersByRole(new Role("Inventory Manager"));
-                    for (User user : users) {
-                        List<Alert> alertList = Context.getAlertService().getAlertsByUser(user);
-                        boolean repeatedAlert = false;
+                String itemName = item.getName();
+                List<ItemStock> itemStockList = itemStockDataService.getItemStockByItem(item, null);
 
-                        for(Alert alert : alertList) {
-                            if(alert.getText().contains(itemName) == true) {
-                                repeatedAlert = true;
-                                break;
+                if(itemStockList == null || itemStockList.isEmpty()) {
+                    setupAlertsForItem(itemName, itemName + " stock is below " + ITEM_STOCK_LIMIT + "!");
+                }
+
+                for(ItemStock itemStock : itemStockList) {
+                    if (itemStock == null || itemStock.getQuantity() < ITEM_STOCK_LIMIT)
+                    {
+                        setupAlertsForItem(itemName, itemName + " stock is below " + ITEM_STOCK_LIMIT + "!");
+                        break;
+                    }
+
+                    if (itemStock != null) {
+                        Set<ItemStockDetail> itemStockDetailList = itemStock.getDetails();
+                        for (ItemStockDetail itemStockDetail : itemStockDetailList) {
+                            Date expiryDate = itemStockDetail.getExpiration();
+                            Date currentDate = new Date(System.currentTimeMillis());
+                            if (expiryDate.getTime() <= currentDate.getTime() + EXPIRY_PERIOD.getTime()) {
+                                setupAlertsForItem(itemName, itemName + " stock will expire in " + expiryDate + "!");
                             }
                         }
-
-                        if(repeatedAlert == false) {
-                            //Create an Alert
-                            Alert newAlert = new Alert();
-                            newAlert.setText(itemName + " stock is below " + ITEM_STOCK_LIMIT + "!");
-                            newAlert.addRecipient(user);
-                            Context.getAlertService().saveAlert(newAlert);
-                        }
                     }
+
                 }
             }
             catch (Exception e)
