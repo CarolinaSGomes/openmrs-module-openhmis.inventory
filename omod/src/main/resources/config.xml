@@ -145,5 +145,12 @@
 		<name>Purge Inventory Metadata</name>
 		<description>Able to purge inventory module metadata</description>
 	</privilege>
+	
+	<!-- View Item Concept Suggestion Page -->
+	<privilege>
+		<name>View Item Concept Suggestion Page</name>
+		<description>Able to work with Item Concept Suggestion Page</description>
+	</privilege>
+	
 </module>
 
