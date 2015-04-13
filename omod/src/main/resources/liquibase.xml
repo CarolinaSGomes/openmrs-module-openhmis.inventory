@@ -928,6 +928,11 @@
 		                         referencedTableName="drug" referencedColumnNames="drug_id"/>
     </changeSet>
     <changeSet id="openhmis.inventory-v1.0.0-14" author="carol">
+    	<preConditions onFail="MARK_RAN">
+    		<not>
+                <columnExists tableName="inv_item" columnName="location_id"/>
+            </not>	     
+    	</preConditions>    	
         <addColumn tableName="inv_item">
             <column name="location_id" type="int" />
         </addColumn>
