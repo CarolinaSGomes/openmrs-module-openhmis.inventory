@@ -58,7 +58,7 @@
 		    </a>
 	    </li>
     </openmrs:hasPrivilege>
-	<openmrs:hasPrivilege privilege="<%= PrivilegeWebConstants.ITEM_PAGE_PRIVILEGES %>">
+	<openmrs:hasPrivilege privilege="<%= PrivilegeWebConstants.ITEM_CONCEPT_SUGGESTION_PAGE_PRIVILEGES %>">
 		<li>
 			<a href="${pageContext.request.contextPath}<%= ModuleWebConstants.ITEM_CONCEPT_SUGGESTION_PAGE %>">
 				<openmrs:message code="openhmis.inventory.admin.items.concept.mapping"/>
