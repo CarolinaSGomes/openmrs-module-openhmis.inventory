@@ -211,6 +211,7 @@ public class StockroomDataServiceImpl
     @Override
     public List<Stockroom> getStockroomsByLocation(Location location, boolean includeRetired) throws APIException {
         return getStockroomsByLocation(location, includeRetired, null);
+
     }
 
     @Override
@@ -222,8 +223,9 @@ public class StockroomDataServiceImpl
         return executeCriteria(Stockroom.class, pagingInfo, new Action1<Criteria>() {
             @Override
             public void apply(Criteria criteria) {
-                updateLocationUserCriteria(criteria);
                 criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location));
+				updateLocationUserCriteria(criteria);
+
                 if (!includeRetired) {
                     criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
                 }
@@ -251,9 +253,9 @@ public class StockroomDataServiceImpl
         return executeCriteria(Stockroom.class, pagingInfo, new Action1<Criteria>() {
             @Override
             public void apply(Criteria criteria) {
-                updateLocationUserCriteria(criteria);
                 criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location))
                         .add(Restrictions.ilike(HibernateCriteriaConstants.NAME, name, MatchMode.START));
+				updateLocationUserCriteria(criteria);
 
                 if (!includeRetired) {
                     criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
