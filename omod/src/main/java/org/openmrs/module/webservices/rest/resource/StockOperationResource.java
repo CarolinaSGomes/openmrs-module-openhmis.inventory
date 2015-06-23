@@ -139,21 +139,21 @@ public class StockOperationResource
 				} catch (Exception ex) {
 					LOG.error("Could not generate operation number: " + ex.getMessage());
 
-					throw new IllegalStateException("The Operation Number was not defined and could not be generated.", ex);
+					throw new IllegalStateException("The Batch Number was not defined and could not be generated.", ex);
 				}
 			} else if (StringUtils.isEmpty(operationNumber)) {
-				LOG.error("Operation Number not defined or generated.");
+				LOG.error("Batch Number not defined or generated.");
 
-				throw new IllegalStateException("The Operation Number was not defined and no generator was configured.");
+				throw new IllegalStateException("The Batch Number was not defined and no generator was configured.");
 			} else {
 				instance.setOperationNumber(operationNumber);
 			}
 		} else if (!StringUtils.isEmpty(operationNumber)) {
 			instance.setOperationNumber(operationNumber);
 		} else {
-			LOG.error("Operation Number not defined or generated.");
+			LOG.error("Batch Number not defined or generated.");
 
-			throw new IllegalStateException("The Operation Number was not defined and no generator was configured.");
+			throw new IllegalStateException("The Batch Number was not defined and no generator was configured.");
 		}
 	}
 	

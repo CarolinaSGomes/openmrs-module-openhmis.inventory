@@ -36,7 +36,7 @@
 				<input id="autoGenerateOperationNumber" name="${status.expression}" type="checkbox"
 				       onClick="enableDisable()"
 					<c:if test="${settings.autoGenerateOperationNumber}">checked</c:if> />
-				<label for="autoGenerateOperationNumber">Auto Generate Operation Number</label>
+				<label for="autoGenerateOperationNumber">Auto Generate Batch Number</label>
 			</spring:bind>
 		</td></tr>
 		<tr><td>

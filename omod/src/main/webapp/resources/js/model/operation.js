@@ -212,7 +212,10 @@ define(
             initialize: function(attrs, options) {
                 openhmis.GenericModel.prototype.initialize.call(this, attrs, options);
 
-                this.schema.operationNumber = { type: 'Text' };
+                this.schema.operationNumber = { 
+            			type: 'Text',
+						title: 'Batch Number' 
+					};
                 this.schema.status = {
                     type: 'Text',
                     readonly: 'readonly',
