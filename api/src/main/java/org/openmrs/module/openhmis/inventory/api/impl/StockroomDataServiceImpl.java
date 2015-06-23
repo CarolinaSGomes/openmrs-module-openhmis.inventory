@@ -19,6 +19,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Location;
+import org.apache.log4j.Logger;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.User;
 import org.openmrs.api.APIException;
@@ -45,6 +46,7 @@ public class StockroomDataServiceImpl
 		implements IStockroomDataService, IMetadataAuthorizationPrivileges {
 
     private static final String LOCATIONPROPERTY = "defaultLocation";
+	private static final Logger logger = Logger.getLogger(StockroomDataServiceImpl.class);
 
 	@Override
 	protected IMetadataAuthorizationPrivileges getPrivileges() {
@@ -64,26 +66,36 @@ public class StockroomDataServiceImpl
 		return results;
 	}
 
+
+    // Method for determining user location
     public void updateLocationUserCriteria(Criteria criteria) {
-
+    	logger.warn("UPDATING STOCKROOM LOCATION RESTRICTION");
         User user = Context.getAuthenticatedUser();
-        Location location = null;
-
         if (user.hasRole(RoleConstants.SUPERUSER))
+        {	
+        	logger.warn("BYPASSING FOR SUPERUSER");
             return;
-
+        }
+        
+        Location location = null;
         try {
             location = Context.getLocationService().getLocation(Integer.parseInt(user.getUserProperty(LOCATIONPROPERTY)));
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        	logger.warn("COULD NOT RESTRICT STOCKROOM BY LOCATION");
+        }
 
         if (location == null) {
             // impossible criterion so that no results will be returned
+        	logger.warn("APPLYING IMPOSSIBLE STOCKROOM LOCATION RESTRICTION...");
             criteria.add(Restrictions.isNull("creator"));
             return;
         }
-
-        criteria.add(Restrictions.eq("location", location));
+        logger.warn("APPLYING STOCKROOM LOCATION RESTRICTION " + location.getName() + "...");
+        criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location));
+        logger.warn("SUCCESS!");
+        //if (!Context.getAuthenticatedUser().hasRole(RoleConstants.SUPERUSER)) {	criteria.add(Restrictions.eq("location", Context.getLocationService().getLocation(Integer.parseInt(user.getUserProperty("defaultLocation")))));	}
     }
+
 
 	@Override
 	public List<ItemStock> getItemsByRoom(final Stockroom stockroom, PagingInfo paging) {
