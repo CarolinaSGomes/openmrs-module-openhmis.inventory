@@ -247,6 +247,8 @@ public class IStockOperationServiceTest extends BaseModuleContextSensitiveTest {
 		// Get a stockroom
 		Stockroom stockroom = stockroomService.getById(0);
 
+        Assert.assertNotNull(stockroom);
+
 		// Ensure that the stockroom does not have any item stock for the created item2
 		Assert.assertNull(stockroomService.getItem(stockroom, item));
 		Assert.assertNull(stockroomService.getItem(stockroom, item2));

@@ -66,7 +66,6 @@ public class StockroomDataServiceImpl
 		return results;
 	}
 
-
     // Method for determining user location
     public void updateLocationUserCriteria(Criteria criteria) {
     	logger.warn("UPDATING STOCKROOM LOCATION RESTRICTION");
@@ -142,8 +141,8 @@ public class StockroomDataServiceImpl
 				}
                 updateLocationUserCriteria(criteria);
 				criteria.add(Restrictions.or(
-						Restrictions.eq(HibernateCriteriaConstants.SOURCE, stockroom),
-						Restrictions.eq(HibernateCriteriaConstants.DESTINATION, stockroom))
+                                Restrictions.eq(HibernateCriteriaConstants.SOURCE, stockroom),
+                                Restrictions.eq(HibernateCriteriaConstants.DESTINATION, stockroom))
 				);
 			}
 		}, Order.desc("dateChanged"), Order.desc("dateCreated"));
@@ -221,9 +220,20 @@ public class StockroomDataServiceImpl
 	}
 
     @Override
+    public List<Stockroom> getAll (final boolean includeRetired, PagingInfo pagingInfo){
+        return executeCriteria(Stockroom.class, pagingInfo, new Action1<Criteria>() {
+            public void apply(Criteria criteria) {
+                if (!includeRetired) {
+                    criteria.add(Restrictions.eq("retired", false));
+                    updateLocationUserCriteria(criteria);
+                }
+            }
+        }, this.getDefaultSort());
+    }
+
+    @Override
     public List<Stockroom> getStockroomsByLocation(Location location, boolean includeRetired) throws APIException {
         return getStockroomsByLocation(location, includeRetired, null);
-
     }
 
     @Override
@@ -236,8 +246,6 @@ public class StockroomDataServiceImpl
             @Override
             public void apply(Criteria criteria) {
                 criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location));
-				updateLocationUserCriteria(criteria);
-
                 if (!includeRetired) {
                     criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
                 }
@@ -253,7 +261,7 @@ public class StockroomDataServiceImpl
     @Override
     public List<Stockroom> getStockrooms(final Location location, final String name, final boolean includeRetired, PagingInfo pagingInfo) throws APIException {
         if (location == null) {
-            throw new NullPointerException("The department must be defined");
+            throw new NullPointerException("The location must be defined");
         }
         if (StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("The stockroom code must be defined.");
@@ -267,7 +275,6 @@ public class StockroomDataServiceImpl
             public void apply(Criteria criteria) {
                 criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location))
                         .add(Restrictions.ilike(HibernateCriteriaConstants.NAME, name, MatchMode.START));
-				updateLocationUserCriteria(criteria);
 
                 if (!includeRetired) {
                     criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
