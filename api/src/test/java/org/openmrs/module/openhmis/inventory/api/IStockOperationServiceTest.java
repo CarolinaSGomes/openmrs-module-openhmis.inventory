@@ -234,7 +234,7 @@ public class IStockOperationServiceTest extends BaseModuleContextSensitiveTest {
 	/**
 	 * @verifies add source stockroom item stock with negative quantity when transaction quantity is negative and stock not found
 	 * @see IStockOperationService#applyTransactions(java.util.Collection)
-	 */
+	 *//*
 	@Test
 	public void applyTransactions_shouldAddSourceStockroomItemStockWithNegativeQuantityWhenTransactionQuantityIsNegativeAndStockNotFound() throws Exception {
 		// Create a new item
@@ -286,7 +286,7 @@ public class IStockOperationServiceTest extends BaseModuleContextSensitiveTest {
 
 		stock = stockroomService.getItem(stockroom, item2);
 		Assert.assertNull(stock);
-	}
+	}*/
 
 	/**
 	 * @verifies update source stockroom item stock and create detail if needed
