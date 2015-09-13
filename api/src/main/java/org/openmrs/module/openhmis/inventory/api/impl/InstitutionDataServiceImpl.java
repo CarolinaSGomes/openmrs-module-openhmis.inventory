@@ -19,8 +19,10 @@ import org.openmrs.Location;
 import org.openmrs.User;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.impl.BaseMetadataDataServiceImpl;
 import org.openmrs.module.openhmis.commons.api.entity.security.IMetadataAuthorizationPrivileges;
+import org.openmrs.module.openhmis.commons.api.f.Action1;
 import org.openmrs.module.openhmis.inventory.api.IInstitutionDataService;
 import org.openmrs.module.openhmis.inventory.api.model.Institution;
 import org.openmrs.module.openhmis.inventory.api.security.BasicMetadataAuthorizationPrivileges;
@@ -39,27 +41,6 @@ public class InstitutionDataServiceImpl
 
     private static final String LOCATIONPROPERTY = "defaultLocation";
 
-    public void updateLocationUserCriteria(Criteria criteria) {
-
-        User user = Context.getAuthenticatedUser();
-        Location location = null;
-
-        if (user.hasRole(RoleConstants.SUPERUSER))
-            return;
-
-        try {
-            location = Context.getLocationService().getLocation(Integer.parseInt(user.getUserProperty(LOCATIONPROPERTY)));
-        } catch (Exception e) {}
-
-        if (location == null) {
-            // impossible criterion so that no results will be returned
-            criteria.add(Restrictions.isNull("creator"));
-            return;
-        }
-
-        criteria.add(Restrictions.eq("location", location));
-    }
-
     @Override
     public List<Institution> getAll(boolean b, org.openmrs.module.openhmis.commons.api.PagingInfo pagingInfo) {
         User user = Context.getAuthenticatedUser();
@@ -76,7 +57,12 @@ public class InstitutionDataServiceImpl
             return new LinkedList<Institution>();
         }
 
-        return super.getAll(b, pagingInfo);
+        List<Institution> institutions = super.getAll(b, pagingInfo);
+        List<Institution> result = new LinkedList<Institution>();
+        for (Institution i : institutions)
+            if (i.getLocation() == location)
+                result.add(i);
+        return result;
     }
 
     @Override
@@ -96,7 +82,12 @@ public class InstitutionDataServiceImpl
             return new LinkedList<Institution>();
         }
 
-        return super.getByNameFragment(s, b, pagingInfo);
+        List<Institution> institutions = super.getByNameFragment(s, b, pagingInfo);
+        List<Institution> result = new LinkedList<Institution>();
+        for (Institution i : institutions)
+            if (i.getLocation() == location)
+                result.add(i);
+        return result;
     }
 
 

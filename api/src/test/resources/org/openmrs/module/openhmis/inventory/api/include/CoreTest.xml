@@ -36,4 +36,6 @@
 	       creator="1" date_created="2008-08-15 15:57:09.0" changed_by="1" date_changed="2008-08-18 11:51:56.0"
 	       retired="false" retire_reason="" uuid="06d05314-e132-11de-babe-001e378eb67e"/>
 	<user_role user_id="5506" role="Child Role" />
+
+    <user_property user_id="5506" property="defaultLocation" property_value="1"/>
 </dataset>

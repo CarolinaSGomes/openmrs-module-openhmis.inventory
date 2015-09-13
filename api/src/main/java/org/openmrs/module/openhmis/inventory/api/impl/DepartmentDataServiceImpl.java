@@ -40,28 +40,6 @@ public class DepartmentDataServiceImpl
 
     private static final String LOCATIONPROPERTY = "defaultLocation";
 
-    // Method for determining user location
-    public void updateLocationUserCriteria(Criteria criteria) {
-
-        User user = Context.getAuthenticatedUser();
-        Location location = null;
-
-        if (user.hasRole(RoleConstants.SUPERUSER))
-            return;
-
-        try {
-            location = Context.getLocationService().getLocation(Integer.parseInt(user.getUserProperty(LOCATIONPROPERTY)));
-        } catch (Exception e) {}
-
-        if (location == null) {
-            // impossible criterion so that no results will be returned
-            criteria.add(Restrictions.isNull("creator"));
-            return;
-        }
-
-        criteria.add(Restrictions.eq("location", location));
-    }
-
     @Override
     public List<Department> getAll(boolean b, org.openmrs.module.openhmis.commons.api.PagingInfo pagingInfo) {
         User user = Context.getAuthenticatedUser();
@@ -102,7 +80,12 @@ public class DepartmentDataServiceImpl
             return new LinkedList<Department>();
         }
 
-        return super.getByNameFragment(s, b, pagingInfo);
+        List<Department> departments = super.getByNameFragment(s, b, pagingInfo);
+        List<Department> result = new LinkedList<Department>();
+        for (Department d : departments)
+            if (d.getLocation() == location)
+                result.add(d);
+        return result;
     }
 
 	@Override
