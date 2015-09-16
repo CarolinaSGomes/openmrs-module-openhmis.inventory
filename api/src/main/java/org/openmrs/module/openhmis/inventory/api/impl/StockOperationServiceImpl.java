@@ -495,15 +495,22 @@ public class StockOperationServiceImpl
 		final DateTime operationTime = new DateTime(operation.getOperationDate());
 
 		return Collections.min(details, new Comparator<ItemStockDetail>() {
-			@Override
-			public int compare(ItemStockDetail o1, ItemStockDetail o2) {
-				DateTime o1Time = new DateTime(o1.getBatchOperation().getOperationDate());
-				DateTime o2Time = new DateTime(o2.getBatchOperation().getOperationDate());
+            @Override
+            public int compare(ItemStockDetail o1, ItemStockDetail o2) {
+                DateTime o1Time = new DateTime();
+                if (o1.getBatchOperation().getOperationDate() != null) {
+                    o1Time = new DateTime(o1.getBatchOperation().getOperationDate());
+                }
+                
+                DateTime o2Time = new DateTime();
+                if (o2.getBatchOperation().getOperationDate() != null) {
+                    o2Time = new DateTime(o2.getBatchOperation().getOperationDate());
+                }
 
-				return ((Integer) Seconds.secondsBetween(operationTime, o1Time).getSeconds()).compareTo(
-						Seconds.secondsBetween(operationTime, o2Time).getSeconds());
-			}
-		});
+                return ((Integer) Seconds.secondsBetween(operationTime, o1Time).getSeconds()).compareTo(
+                        Seconds.secondsBetween(operationTime, o2Time).getSeconds());
+            }
+        });
 	}
 
 	private Map<Pair<Item, Stockroom>, List<StockOperationTransaction>> createGroupedTransactions(StockOperationTransaction[] transactions) {
