@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
+import org.apache.log4j.Logger;
+
 public class StockOperationServiceImpl
 		extends BaseOpenmrsService
 		implements IStockOperationService {
@@ -27,6 +29,8 @@ public class StockOperationServiceImpl
 	private IStockroomDataService stockroomService;
 	private IItemStockDataService itemStockService;
 	protected IStockOperationDataService operationService;
+
+    private static final Logger logger = Logger.getLogger(StockOperationServiceImpl.class);
 
 	@Autowired
 	public StockOperationServiceImpl(IStockOperationDataService operationService,
@@ -493,17 +497,37 @@ public class StockOperationServiceImpl
 
 	private ItemStockDetail findOldestBatch(StockOperation operation, Collection<ItemStockDetail> details) {
 		final DateTime operationTime = new DateTime(operation.getOperationDate());
+        Collection<ItemStockDetail> fullDetails = new ArrayList<ItemStockDetail>();
 
-		return Collections.min(details, new Comparator<ItemStockDetail>() {
-			@Override
-			public int compare(ItemStockDetail o1, ItemStockDetail o2) {
-				DateTime o1Time = new DateTime(o1.getBatchOperation().getOperationDate());
-				DateTime o2Time = new DateTime(o2.getBatchOperation().getOperationDate());
+        for (ItemStockDetail detail : details){
+            if (detail.getBatchOperation() != null)
+                fullDetails.add(detail);
+        }
 
-				return ((Integer) Seconds.secondsBetween(operationTime, o1Time).getSeconds()).compareTo(
-						Seconds.secondsBetween(operationTime, o2Time).getSeconds());
-			}
-		});
+		return Collections.min(fullDetails, new Comparator<ItemStockDetail>() {
+            @Override
+            public int compare(ItemStockDetail o1, ItemStockDetail o2) {
+                DateTime o1Time = new DateTime();
+                DateTime o2Time = new DateTime();
+
+                if (o1.getBatchOperation() != null) {
+                    if (o1.getBatchOperation().getOperationDate() != null) {
+                        o1Time = new DateTime(o1.getBatchOperation().getOperationDate());
+                    } else
+                        logger.warn("o1 has no operation date for batch operation " + o1.getBatchOperation().getUuid());
+                } else
+                    logger.warn("o1 item has no batch operation " + o1.getUuid());
+
+                if (o2.getBatchOperation().getOperationDate() != null) {
+                    o2Time = new DateTime(o2.getBatchOperation().getOperationDate());
+                } else
+                    logger.warn("o2 item time has no operation date for batch operation " + o1.getBatchOperation().getUuid());
+
+
+                return ((Integer) Seconds.secondsBetween(operationTime, o1Time).getSeconds()).compareTo(
+                        Seconds.secondsBetween(operationTime, o2Time).getSeconds() + 1);
+            }
+        });
 	}
 
 	private Map<Pair<Item, Stockroom>, List<StockOperationTransaction>> createGroupedTransactions(StockOperationTransaction[] transactions) {
