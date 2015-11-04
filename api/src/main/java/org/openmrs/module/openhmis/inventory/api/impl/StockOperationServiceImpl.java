@@ -300,6 +300,9 @@ public class StockOperationServiceImpl
 		ItemStockDetail detail = findCalculatedDetail(operation, stock, tx);
 
 		if (detail == null) {
+            if (tx.getQuantity() > 0) {
+                throw new APIException("Resource stockroom does not have sufficient stock.");
+            }
 			tx.setSourceCalculatedExpiration(true);
 			tx.setSourceCalculatedBatch(true);
 			tx.setExpiration(null);
