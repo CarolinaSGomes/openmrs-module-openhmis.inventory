@@ -145,6 +145,11 @@
 		<name>Purge Inventory Metadata</name>
 		<description>Able to purge inventory module metadata</description>
 	</privilege>
+
+	<privilege>
+		<name>Manage Inventory Operation Types</name>
+		<description>Able to manage Operation Types</description>
+	</privilege>
 	
 	<!-- View Item Concept Suggestion Page -->
 	<privilege>
