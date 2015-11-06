@@ -53,7 +53,7 @@
 		    </a>
 	    </li>
     </openmrs:hasPrivilege>
-    <openmrs:hasPrivilege privilege="<%= PrivilegeWebConstants.OPERATION_TYPES_PAGE %>">
+    <openmrs:hasPrivilege privilege="<%= PrivilegeWebConstants.OPERATION_TYPES_PAGE_PRIVILEGES %>">
 	    <li>
 		    <a href="${pageContext.request.contextPath}<%= ModuleWebConstants.OPERATION_TYPES_PAGE %>">
 			    <openmrs:message code="openhmis.inventory.admin.operationTypes"/>
