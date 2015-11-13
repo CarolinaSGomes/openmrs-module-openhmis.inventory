@@ -34,6 +34,8 @@ public class PrivilegeConstants {
 	public static final String MANAGE_METADATA = "Manage Inventory Metadata";
 	public static final String VIEW_METADATA = "View Inventory Metadata";
 	public static final String PURGE_METADATA = "Purge Inventory Metadata";
+
+    public static final String MANAGE_OPERATION_TYPES = "Manage Inventory Operation Types";
 	
 	public static final String VIEW_ITEM_CONCEPT_SUGGESTION_PAGE = "View Item Concept Suggestion Page";
 

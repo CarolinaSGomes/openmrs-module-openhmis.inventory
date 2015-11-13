@@ -21,6 +21,7 @@ import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
+import org.openmrs.Location;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Role;
 import org.openmrs.User;
@@ -32,10 +33,10 @@ import org.openmrs.module.openhmis.commons.api.f.Action;
 import org.openmrs.module.openhmis.commons.api.f.Action1;
 import org.openmrs.module.openhmis.inventory.api.IItemStockDataService;
 import org.openmrs.module.openhmis.inventory.api.IStockOperationDataService;
-import org.openmrs.module.openhmis.inventory.api.IStockroomDataService;
 import org.openmrs.module.openhmis.inventory.api.model.*;
 import org.openmrs.module.openhmis.inventory.api.search.StockOperationSearch;
 import org.openmrs.module.openhmis.inventory.api.security.BasicMetadataAuthorizationPrivileges;
+import org.openmrs.util.RoleConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -59,6 +60,8 @@ public class StockOperationDataServiceImpl
 		// Return operations ordered by creation date, desc
 		return new Order[] { Order.desc("dateCreated") };
 	}
+
+	private static final String LOCATIONPROPERTY = "defaultLocation";
 
 	@Override
 	public StockOperation getOperationByNumber(String number) {
@@ -121,7 +124,7 @@ public class StockOperationDataServiceImpl
 		// Get all the roles for this user (this traverses the role relationships to get any parent roles)
 		final Set<Role> roles = user.getAllRoles();
 
-		return executeCriteria(StockOperation.class, paging, new Action1<Criteria>() {
+		List<StockOperation> stockOperations =  executeCriteria(StockOperation.class, paging, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
 				DetachedCriteria subQuery = DetachedCriteria.forClass(IStockOperationType.class);
@@ -160,6 +163,31 @@ public class StockOperationDataServiceImpl
 			}
 		}, Order.desc("dateCreated")
 		);
+
+		//This code ensures that the resulting operations are all belonging to the appropriate stockrooms from the user defaultLocation
+		List<StockOperation> result = new ArrayList<StockOperation>();
+		Location location = Context.getLocationService().getLocation(Integer.parseInt(Context.getAuthenticatedUser().getUserProperty(LOCATIONPROPERTY)));
+		for (StockOperation stockOperation : stockOperations) {
+			if (ensuredStockOperationBelongsToLocation(stockOperation, location) == true){
+				result.add(stockOperation);
+			}
+		}
+		return result;
+	}
+
+	public boolean ensuredStockOperationBelongsToLocation (StockOperation stockOperation, Location locus){
+		if (Context.getAuthenticatedUser().hasRole(RoleConstants.SUPERUSER)){
+			return true;
+		} else if (stockOperation.getSource() != null) {
+			if (locus.getId() == (stockOperation.getSource().getLocation().getId())) {
+				return true;
+			}
+		} else if(stockOperation.getDestination() != null) {
+			if (locus.getId() == (stockOperation.getDestination().getLocation().getId())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -175,12 +203,64 @@ public class StockOperationDataServiceImpl
 			throw new IllegalArgumentException("The operation search template must be defined.");
 		}
 
-		return executeCriteria(StockOperation.class, paging, new Action1<Criteria>() {
+		List<StockOperation> stockOperations = new ArrayList<StockOperation>();
+		List<StockOperation> result = new ArrayList<StockOperation>();
+		Location location = Context.getLocationService().getLocation(Integer.parseInt(Context.getAuthenticatedUser().getUserProperty(LOCATIONPROPERTY)));
+
+		stockOperations = executeCriteria(StockOperation.class, paging, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
 				search.updateCriteria(criteria);
 			}
 		}, getDefaultSort());
+
+		//This code ensures that the resulting operations are all belonging to the appropriate stockrooms from the user defaultLocation
+		for (StockOperation stockOperation : stockOperations) {
+			if (ensuredStockOperationBelongsToLocation(stockOperation, location) == true){
+				result.add(stockOperation);
+			}
+		}
+
+		return result;
+	}
+
+
+	@Override
+	public List<StockOperation> getAll(PagingInfo paging) {
+		return getAll(false, paging);
+	}
+
+	@Override
+	public List<StockOperation> getAll() {
+		return getAll(false, null);
+	}
+
+	@Override
+	public List<StockOperation> getAll(final boolean includeRetired) {
+		return getAll(includeRetired, null);
+	}
+
+	@Override
+	public List<StockOperation> getAll(final boolean includeRetired, PagingInfo paging) {
+
+
+		List<StockOperation> stockOperations = executeCriteria(StockOperation.class, paging, new Action1<Criteria>() {
+			public void apply(Criteria criteria) {
+				if (!includeRetired) {
+					criteria.add(Restrictions.eq("retired", false));
+				}
+			}
+		}, getDefaultSort());
+
+		//This code ensures that the resulting operations are all belonging to the appropriate stockrooms from the user defaultLocation
+		List<StockOperation> result = new ArrayList<StockOperation>();
+		Location location = Context.getLocationService().getLocation(Integer.parseInt(Context.getAuthenticatedUser().getUserProperty(LOCATIONPROPERTY)));
+		for (StockOperation stockOperation : stockOperations) {
+			if (ensuredStockOperationBelongsToLocation(stockOperation, location) == true){
+				result.add(stockOperation);
+			}
+		}
+		return result;
 	}
 
 	@Override
