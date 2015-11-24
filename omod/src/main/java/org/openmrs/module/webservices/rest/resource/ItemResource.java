@@ -40,7 +40,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-@Resource(name= ModuleRestConstants.ITEM_RESOURCE, supportedClass=Item.class, supportedOpenmrsVersions={"1.9"})
+@Resource(name= ModuleRestConstants.ITEM_RESOURCE, supportedClass=Item.class, supportedOpenmrsVersions={"1.11"})
 public class ItemResource extends BaseRestMetadataResource<Item> {
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {

@@ -27,7 +27,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-@Resource(name = ModuleRestConstants.ITEM_STOCK_RESOURCE, supportedClass=ItemStock.class, supportedOpenmrsVersions={"1.9"})
+@Resource(name = ModuleRestConstants.ITEM_STOCK_RESOURCE, supportedClass=ItemStock.class, supportedOpenmrsVersions={"1.11"})
 public class ItemStockResource extends BaseRestObjectResource<ItemStock> {
 	@Override
 	public ItemStock newDelegate() {

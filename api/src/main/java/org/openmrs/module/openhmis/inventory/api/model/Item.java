@@ -228,9 +228,4 @@ public class Item extends BaseCustomizableMetadata<ItemAttribute> implements Cus
 
     public void setDrug(Drug drug) { this.drug = drug; }
 
-	@Override
-	@JsonIgnore
-	public Boolean getRetired() {
-		return isRetired();
-	}
 }

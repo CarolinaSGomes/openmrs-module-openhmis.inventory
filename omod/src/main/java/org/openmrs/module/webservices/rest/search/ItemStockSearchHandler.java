@@ -52,7 +52,7 @@ public class ItemStockSearchHandler
 	private static Log log = LogFactory.getLog(ItemStockSearchHandler.class);
 
 	private final SearchConfig searchConfig = new SearchConfig("default", ModuleRestConstants.ITEM_STOCK_RESOURCE,
-			Arrays.asList("1.9.*"),
+			Arrays.asList("1.11.*"),
 			Arrays.asList(
 					new SearchQuery.Builder("Find item stock by stockroom and an optional name fragment.")
 							.withOptionalParameters("q", "item_uuid", "stockroom_uuid")

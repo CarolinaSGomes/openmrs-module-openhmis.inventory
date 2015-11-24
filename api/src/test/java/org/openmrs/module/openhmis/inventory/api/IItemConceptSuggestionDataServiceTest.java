@@ -31,6 +31,14 @@ public class IItemConceptSuggestionDataServiceTest extends BaseModuleContextSens
 
 		executeDataSet(ITEM_DATASET);
 	}
+
+
+	@Test
+	public void shouldSetupContext() throws Exception{
+		assertNotNull(service);
+		assertNotNull(itemService);
+		assertNotNull(conceptService);
+	}
 	
 	@Test
     public void getItemsWithConceptSuggestions_shouldOnlyItemsConceptsWhereConceptSuggestionsAreNotAccepted() throws Exception {

@@ -23,7 +23,7 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
 
-@Resource(name= ModuleRestConstants.ITEM_PRICE_RESOURCE, supportedClass=ItemPrice.class, supportedOpenmrsVersions={"1.9"})
+@Resource(name= ModuleRestConstants.ITEM_PRICE_RESOURCE, supportedClass=ItemPrice.class, supportedOpenmrsVersions={"1.11"})
 public class ItemPriceResource extends BaseRestMetadataResource<ItemPrice> implements IMetadataDataServiceResource<ItemPrice> {
 	@PropertySetter(value = "price")
 	public void setPrice(ItemPrice instance, Object price) throws ConversionException {
