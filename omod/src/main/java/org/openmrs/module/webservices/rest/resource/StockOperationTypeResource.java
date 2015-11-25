@@ -28,7 +28,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 
 import java.util.List;
 
-@Resource(name = ModuleRestConstants.OPERATION_TYPE_RESOURCE, supportedClass=IStockOperationType.class, supportedOpenmrsVersions={"1.9"})
+@Resource(name = ModuleRestConstants.OPERATION_TYPE_RESOURCE, supportedClass=IStockOperationType.class, supportedOpenmrsVersions={"1.11"})
 public class StockOperationTypeResource
 		extends BaseRestInstanceTypeResource<IStockOperationType, StockOperation, StockOperationAttributeType, StockOperationAttribute> {
 	@Override

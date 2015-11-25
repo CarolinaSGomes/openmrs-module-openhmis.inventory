@@ -27,7 +27,7 @@ public class StockOperationTransactionSearchHandler implements SearchHandler {
 	private static Log log = LogFactory.getLog(ItemStockSearchHandler.class);
 
 	private final SearchConfig searchConfig = new SearchConfig("default", ModuleRestConstants.OPERATION_TRANSACTION_RESOURCE,
-			Arrays.asList("1.9.*"),
+			Arrays.asList("1.11.*"),
 			Arrays.asList(
 					new SearchQuery.Builder("Find all transactions by stockroom.")
 							.withRequiredParameters("stockroom_uuid").build()

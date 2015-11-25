@@ -36,7 +36,7 @@ import java.util.List;
 @Component
 public class DepartmentSearchHandler implements SearchHandler {
 
-    private final SearchConfig searchConfig = new SearchConfig("default", ModuleRestConstants.DEPARTMENT_RESOURCE, Arrays.asList("1.9.*"),
+    private final SearchConfig searchConfig = new SearchConfig("default", ModuleRestConstants.DEPARTMENT_RESOURCE, Arrays.asList("1.11.*"),
             Arrays.asList(
                     new SearchQuery.Builder("Find a department by its name")
                             .withRequiredParameters("q")
