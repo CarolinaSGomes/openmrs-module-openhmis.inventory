@@ -39,7 +39,7 @@ public class Item extends BaseCustomizableMetadata<ItemAttribute> implements Cus
 	private Concept concept;
 	private ItemPrice defaultPrice;
 	private Boolean hasExpiration;
-	private Integer defaultExpirationPeriod;
+	private Integer defaultExpirationPeriodInDays;
 	private Boolean hasPhysicalInventory;
 	private Boolean conceptAccepted;
     private Drug drug;
@@ -204,12 +204,12 @@ public class Item extends BaseCustomizableMetadata<ItemAttribute> implements Cus
 		this.hasExpiration = hasExpiration;
 	}
 
-	public Integer getDefaultExpirationPeriod() {
-		return defaultExpirationPeriod;
+	public Integer getDefaultExpirationPeriodInDays() {
+		return defaultExpirationPeriodInDays;
 	}
 
-	public void setDefaultExpirationPeriod(Integer defaultExpirationPeriod) {
-		this.defaultExpirationPeriod = defaultExpirationPeriod;
+	public void setDefaultExpirationPeriodInDays(Integer defaultExpirationPeriodInDays) {
+		this.defaultExpirationPeriodInDays = defaultExpirationPeriodInDays;
 	}
 
 	public Boolean getConceptAccepted() {

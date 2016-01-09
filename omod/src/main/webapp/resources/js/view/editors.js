@@ -81,11 +81,11 @@ define(
             displayAttr: "operationNumber"
         });
 
-        editors.DefaultExpirationPeriodStepper = editors.Base.extend({
+        editors.DefaultExpirationPeriodInDaysStepper = editors.Base.extend({
             tagName: "span",
             className: "editor",
             tmplFile: openhmis.url.inventoryBase + 'template/editors.html',
-            tmplSelector: '#defaultExpirationPeriodStepper-editor',
+            tmplSelector: '#defaultExpirationPeriodInDaysStepper-editor',
 
             initialize: function (options) {
                 this.events = _.extend({}, this.events, {
@@ -97,25 +97,25 @@ define(
             },
 
             events: {
-                'change #defaultExpirationPeriod': 'update'
+                'change #defaultExpirationPeriodInDays': 'update'
             },
 
             onKeyPress: function (event) {
                 //this is for firefox as arrows are detected as keypress events
-                if ($('input[name=defaultExpirationPeriod]').is(':focus')) {
+                if ($('input[name=defaultExpirationPeriodInDays]').is(':focus')) {
                     var view = this;
                     if (event.keyCode === 38 /*arrow up*/) {
                         if (this.value == null) {
                             this.value = 0;
                         }
-                        var defaultExpirationPeriod = this.value;
-                        this.$('#defaultExpirationPeriod').val(defaultExpirationPeriod + 1)
+                        var defaultExpirationPeriodInDays = this.value;
+                        this.$('#defaultExpirationPeriodInDays').val(defaultExpirationPeriodInDays + 1)
                         this.update();
                     }
                     if (event.keyCode === 40 && this.value != null /*arrow down*/) {
-                        var defaultExpirationPeriod = this.value;
-                        if (defaultExpirationPeriod > 0) {
-                            this.$('#defaultExpirationPeriod').val(defaultExpirationPeriod - 1)
+                        var defaultExpirationPeriodInDays = this.value;
+                        if (defaultExpirationPeriodInDays > 0) {
+                            this.$('#defaultExpirationPeriodInDays').val(defaultExpirationPeriodInDays - 1)
                             this.update();
                         }
                     }
@@ -127,7 +127,7 @@ define(
             },
 
             update: function () {
-                var tmp = this.$('#defaultExpirationPeriod').val();
+                var tmp = this.$('#defaultExpirationPeriodInDays').val();
                 if (tmp != null && tmp != '') {
                     this.value = parseInt(tmp);
                 } else {
@@ -137,7 +137,7 @@ define(
 
             render: function () {
                 this.$el.html(this.template({
-                    defaultExpirationPeriod: this.value
+                    defaultExpirationPeriodInDays: this.value
                 }));
                 this.$('input[type=number]').stepper({
                     allowArrows: false,
@@ -603,7 +603,7 @@ define(
                     // Set the default expiration date to the current date plus the number of days defined in the item's
                     //  default expiration period. If the item does not have a default, no value should be used so that
                     //  user is required to enter something
-                    var itemExpPeriod = this.options.item ? this.options.item.get('defaultExpirationPeriod') : undefined;
+                    var itemExpPeriod = this.options.item ? this.options.item.get('defaultExpirationPeriodInDays') : undefined;
                     if (itemExpPeriod) {
                         defaultExp = new Date();
                         defaultExp.setDate(defaultExp.getDate() + itemExpPeriod);

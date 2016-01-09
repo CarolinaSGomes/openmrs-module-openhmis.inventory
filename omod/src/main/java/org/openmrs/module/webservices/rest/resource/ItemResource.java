@@ -52,7 +52,7 @@ public class ItemResource extends BaseRestMetadataResource<Item> {
             //description.addProperty("category", Representation.REF);
             description.addProperty("defaultPrice", Representation.REF);
 	        description.addProperty("hasExpiration");
-	        description.addProperty("defaultExpirationPeriod");
+	        description.addProperty("defaultExpirationPeriodInDays");
 	        description.addProperty("hasPhysicalInventory");
             description.addProperty("drug", Representation.REF);
         } else {
@@ -65,7 +65,7 @@ public class ItemResource extends BaseRestMetadataResource<Item> {
             description.addProperty("defaultPrice", Representation.REF);
             description.addProperty("concept", Representation.REF);
 	        description.addProperty("hasExpiration");
-	        description.addProperty("defaultExpirationPeriod");
+	        description.addProperty("defaultExpirationPeriodInDays");
 	        description.addProperty("hasPhysicalInventory");
             description.addProperty("drug", Representation.REF);
             description.addProperty("location", Representation.REF);

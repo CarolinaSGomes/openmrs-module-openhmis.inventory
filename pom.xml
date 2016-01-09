@@ -41,8 +41,9 @@
 		<module>omod</module>
 	</modules>
 
+    <!-- Original opeMRSVersion is 1.9.4 currently repurposing for 1.11.3 -->
 	<properties>
-		<openMRSVersion>1.9.4</openMRSVersion>
+		<openMRSVersion>1.11.3</openMRSVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

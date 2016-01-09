@@ -116,7 +116,7 @@ define(
 //                    objRef: true
 //                },
 				hasExpiration: { type: "TrueFalseCheckbox" },
-				defaultExpirationPeriod: { type: 'DefaultExpirationPeriodStepper' },
+				defaultExpirationPeriodInDays: { type: 'DefaultExpirationPeriodInDaysStepper' },
 				concept: { type: 'ConceptInput'},
 				hasPhysicalInventory: { type: "TrueFalseCheckbox" },
 				codes: { type: 'List', itemType: 'NestedModel', model: openhmis.ItemCode },
@@ -213,8 +213,8 @@ define(
 				if (!attrs.defaultPrice) {
 					return { defaultPrice: "Please specify a default price"}
 				}
-				if (attrs.defaultExpirationPeriod && attrs.defaultExpirationPeriod <= 0) {
-					return { defaultExpirationPeriod: "Value must be greater than 0"}
+				if (attrs.defaultExpirationPeriodInDays && attrs.defaultExpirationPeriodInDays <= 0) {
+					return { defaultExpirationPeriodInDays: "Value must be greater than 0"}
 				}
 				return null;
 			},
