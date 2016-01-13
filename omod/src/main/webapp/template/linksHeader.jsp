@@ -16,9 +16,6 @@
   ~ Copyright (C) OpenMRS, LLC.  All Rights Reserved.
   --%>
 <ul id="menu">
-	<li class="first">
-		<a href="${pageContext.request.contextPath}/admin"><openmrs:message code="admin.title.short"/></a>
-	</li>
 	<openmrs:hasPrivilege privilege="<%= PrivilegeWebConstants.INVENTORY_PAGE_PRIVILEGES %>">
 		<li <c:if test='<%= request.getRequestURI().contains("inventory/inventory") %>'>class="active"</c:if>>
 			<a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_PAGE %>">
