@@ -17,7 +17,7 @@
 		<property name="description" type="java.lang.String" column="description" length="1024" />
 		<property name="hasExpiration" type="boolean" column="has_expiration" />
 		<property name="hasPhysicalInventory" type="boolean" column="has_physical_inventory" />
-		<property name="defaultExpirationPeriod" type="int" column="default_expiration_period" />
+		<property name="defaultExpirationPeriodInDays" type="int" column="default_expiration_period" />
 		<property name="conceptAccepted" type="boolean" column="concept_accepted" />
 		<property name="minimumQuantity" type="int" column="minimum_quantity" />
 		<property name="buyingPrice" type="java.math.BigDecimal" column="buying_price" />

@@ -46,10 +46,10 @@
         </ul>
         <ul class="table-layout" ng-show="entity.hasExpiration">
             <li class="not-required">
-                <span>{{messageLabels['openhmis.inventory.item.defaultExpirationPeriod']}}</span>
+                <span>{{messageLabels['openhmis.inventory.item.defaultExpirationPeriodInDays']}}</span>
             </li>
             <li>
-                <input type="number" ng-model="entity.defaultExpirationPeriod" class="minimized"/>
+                <input type="number" ng-model="entity.defaultExpirationPeriodInDays" class="minimized"/>
             </li>
         </ul>
         <ul class="table-layout autocomplete-table-layout">

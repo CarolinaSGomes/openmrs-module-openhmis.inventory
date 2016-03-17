@@ -164,8 +164,8 @@
                     $scope.entity.minimumQuantity = null;
                 }
                 // an empty default expiration period should resolve to null and not an empty string
-                if(!angular.isDefined($scope.entity.defaultExpirationPeriod) || $scope.entity.defaultExpirationPeriod === ''){
-                    $scope.entity.defaultExpirationPeriod = null;
+                if(!angular.isDefined($scope.entity.defaultExpirationPeriodInDays) || $scope.entity.defaultExpirationPeriodInDays === ''){
+                    $scope.entity.defaultExpirationPeriodInDays = null;
                 }
                 // empty codes should resolve as an empty array list
                 if(!angular.isDefined($scope.entity.codes) || $scope.entity.codes === ''){

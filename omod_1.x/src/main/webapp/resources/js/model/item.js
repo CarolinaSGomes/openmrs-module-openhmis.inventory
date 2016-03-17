@@ -127,7 +127,7 @@ define(
 					objRef: true
 				},
 				hasExpiration: { type: "TrueFalseCheckbox" },
-				defaultExpirationPeriod: { type: 'DefaultExpirationPeriodStepper' },
+				defaultExpirationPeriodInDays: { type: 'defaultExpirationPeriodInDaysStepper' },
 				concept: { type: 'ConceptInput'},
 				hasPhysicalInventory: { type: "TrueFalseCheckbox" },
 				minimumQuantity: { type: "BasicNumber" },
@@ -216,8 +216,8 @@ define(
 				if (!attrs.defaultPrice) {
 					return { defaultPrice: openhmis.getMessage('openhmis.inventory.item.required.default.PriceError')}
 				}
-				if (attrs.defaultExpirationPeriod && attrs.defaultExpirationPeriod <= 0) {
-					return { defaultExpirationPeriod: openhmis.getMessage('openhmis.inventory.item.required.default.ExpirationPeriodError')}
+				if (attrs.defaultExpirationPeriodInDays && attrs.defaultExpirationPeriodInDays <= 0) {
+					return { defaultExpirationPeriodInDays: openhmis.getMessage('openhmis.inventory.item.required.default.ExpirationPeriodError')}
 				}
 				if (attrs.minimumQuantity && attrs.minimumQuantity !== parseInt(attrs.minimumQuantity)) {
 					return { minimumQuantity: openhmis.getMessage('openhmis.inventory.item.required.minimumQuantity')}

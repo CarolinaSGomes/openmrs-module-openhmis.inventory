@@ -26,7 +26,7 @@ define(
                 _.bindAll(this);
                 this.events = _.extend({}, this.events, {
                     'click [data-action="remove-concept"]' : 'onRemove',
-                    'change [name="hasExpiration"]' : 'showDefaultExpirationPeriodField'
+                    'change [name="hasExpiration"]' : 'showdefaultExpirationPeriodInDaysField'
                 });
                 openhmis.GenericAddEditView.prototype.initialize.call(this, options);
 
@@ -106,7 +106,7 @@ define(
 						$(self.titleEl).show();
 						self.modelForm = self.prepareModelForm(self.model);
 						$(self.formEl).prepend(self.modelForm.el);
-						self.showDefaultExpirationPeriodField();
+						self.showdefaultExpirationPeriodInDaysField();
 						
 						if (model.attributes.concept != null) {
 							var concept = model.attributes.concept;
@@ -125,25 +125,25 @@ define(
                
             },
             
-            showDefaultExpirationPeriodField: function() {
+            showdefaultExpirationPeriodInDaysField: function() {
                 if (this.modelForm.fields['hasExpiration'].getValue() === true) {
-                    $('.field-defaultExpirationPeriod').show();
-                    $('#defaultExpirationPeriod').show();
-                    $('#defaultExpirationPeriodText').hide();
-                } else if (this.modelForm.fields['defaultExpirationPeriod'].getValue() != null && this.modelForm.fields['defaultExpirationPeriod'].getValue() != '') {
-                    $('#defaultExpirationPeriodText').contents().remove();
-                    $('#defaultExpirationPeriodText').append(this.modelForm.fields['defaultExpirationPeriod'].getValue());
-                    $('#defaultExpirationPeriod').hide();
-                    $('#defaultExpirationPeriodText').show();
+                    $('.field-defaultExpirationPeriodInDays').show();
+                    $('#defaultExpirationPeriodInDays').show();
+                    $('#defaultExpirationPeriodInDaysText').hide();
+                } else if (this.modelForm.fields['defaultExpirationPeriodInDays'].getValue() != null && this.modelForm.fields['defaultExpirationPeriodInDays'].getValue() != '') {
+                    $('#defaultExpirationPeriodInDaysText').contents().remove();
+                    $('#defaultExpirationPeriodInDaysText').append(this.modelForm.fields['defaultExpirationPeriodInDays'].getValue());
+                    $('#defaultExpirationPeriodInDays').hide();
+                    $('#defaultExpirationPeriodInDaysText').show();
                 } else {
-                    $('.field-defaultExpirationPeriod').hide();
+                    $('.field-defaultExpirationPeriodInDays').hide();
                 	
                 }
             },
             
             beginAdd: function() {
                 openhmis.GenericAddEditView.prototype.beginAdd.call(this);
-                this.showDefaultExpirationPeriodField();
+                this.showdefaultExpirationPeriodInDaysField();
             },
             
             save: function(event) {

@@ -55,7 +55,7 @@ public class ItemResource extends BaseRestSimpleCustomizableMetadataResource<Ite
 		description.addProperty("codes", Representation.REF);
 		description.addProperty("department", Representation.REF);
 		description.addProperty("hasExpiration");
-		description.addProperty("defaultExpirationPeriod");
+		description.addProperty("defaultExpirationPeriodInDays");
 		description.addProperty("hasPhysicalInventory");
 		description.addProperty("minimumQuantity");
 

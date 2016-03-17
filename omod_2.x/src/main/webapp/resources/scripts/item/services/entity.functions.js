@@ -257,8 +257,8 @@
 					.message('openhmis.inventory.department.name');
 			messages['openhmis.inventory.item.hasExpiration'] = emr
 					.message('openhmis.inventory.item.hasExpiration');
-			messages['openhmis.inventory.item.defaultExpirationPeriod'] = emr
-					.message('openhmis.inventory.item.defaultExpirationPeriod');
+			messages['openhmis.inventory.item.defaultExpirationPeriodInDays'] = emr
+					.message('openhmis.inventory.item.defaultExpirationPeriodInDays');
 			messages['Concept'] = emr.message('Concept');
 			messages['openhmis.inventory.item.hasPhysicalInventory'] = emr
 					.message('openhmis.inventory.item.hasPhysicalInventory');

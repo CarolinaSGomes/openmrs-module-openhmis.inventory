@@ -36,7 +36,7 @@ public class Item extends BaseSimpleCustomizableMetadata<ItemAttribute> implemen
 	private Concept concept;
 	private ItemPrice defaultPrice;
 	private Boolean hasExpiration;
-	private Integer defaultExpirationPeriod;
+	private Integer defaultExpirationPeriodInDays;
 	private Integer minimumQuantity;
 	private Boolean hasPhysicalInventory;
 	private Boolean conceptAccepted;
@@ -182,12 +182,12 @@ public class Item extends BaseSimpleCustomizableMetadata<ItemAttribute> implemen
 		this.hasExpiration = hasExpiration;
 	}
 
-	public Integer getDefaultExpirationPeriod() {
-		return defaultExpirationPeriod;
+	public Integer getdefaultExpirationPeriodInDays() {
+		return defaultExpirationPeriodInDays;
 	}
 
-	public void setDefaultExpirationPeriod(Integer defaultExpirationPeriod) {
-		this.defaultExpirationPeriod = defaultExpirationPeriod;
+	public void setdefaultExpirationPeriodInDays(Integer defaultExpirationPeriodInDays) {
+		this.defaultExpirationPeriodInDays = defaultExpirationPeriodInDays;
 	}
 
 	public Boolean getConceptAccepted() {
