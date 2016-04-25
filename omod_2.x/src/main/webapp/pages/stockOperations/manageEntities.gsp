@@ -62,11 +62,8 @@
 										typeaheadEditable: "true",
 										class: ["form-control"],
 										placeholder: [ui.message('openhmis.inventory.item.enterItemSearch')],
+										ngEnterEvent: "searchStockOperation()"
 								])}
-							</td>
-							<td>
-								<input type="button" class="confirm right" value="Search"
-								       style="width:100px;margin-top:20px;" ng-click="searchStockOperation()"/>
 							</td>
 						</tr>
 					</table></fieldset>
@@ -100,11 +97,11 @@
 
 			<div ng-show="fetchedEntities.length == 0 && searchField != ''">
 				<br/>
-				${ui.message('openhmis.inventory.general.preSearchMessage')} - <b> {{searchField}} </b> - {{postSearchMessage}}
+				${ui.message('openhmis.commons.general.preSearchMessage')} - <b> {{searchField}} </b> - {{postSearchMessage}}
 				<br/><br/>
 				<span><input type="checkbox" ng-checked="includeRetired" ng-model="includeRetired"
 				             ng-change="updateContent()"></span>
-				<span>${ui.message('openhmis.inventory.general.includeRetired')}</span>
+				<span>${ui.message('openhmis.commons.general.includeRetired')}</span>
 			</div>
 			${ui.includeFragment("openhmis.commons", "paginationFragment", [
 					showRetiredSection  : "false"])}

@@ -11,9 +11,9 @@
 		},
 		{
 			label: "${ ui.message("openhmis.inventory.admin.operationTypes")}",
-			link: '/' + OPENMRS_CONTEXT_PATH + '/openhmis.inventory/operationTypes/entities.page#/'
+			link: '/' + OPENMRS_CONTEXT_PATH + '/openhmis.inventory/operationTypes/entities.page##/'
 		},
-		{label: "${ ui.message("openhmis.inventory.general.edit")} ${ui.message("openhmis.inventory.operations.type.name")}"}
+		{label: "${ui.message("openhmis.inventory.operations.type.name")}"}
 	];
 	jQuery('#breadcrumbs').html(emr.generateBreadcrumbHtml(breadcrumbs));
 
@@ -210,7 +210,7 @@
 										       ng-disabled="attributeType.name == '' || attributeType.name == undefined
 										        || attributeType.attributeOrder == undefined
 										       || attributeType.format == undefined || attributeType.format == ''"
-										       value="{{messageLabels['openhmis.inventory.general.confirm']}}"
+										       value="{{messageLabels['openhmis.commons.general.confirm']}}"
 										       ng-click="saveOrUpdate()"/>
 									</span>
 								</div>

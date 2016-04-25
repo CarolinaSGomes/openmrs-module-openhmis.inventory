@@ -46,9 +46,6 @@
 
                 $scope.searchItems = self.searchItems;
                 $scope.selectItem = self.selectItem;
-
-                $scope.postSearchMessage = $filter('EmrFormat')(emr.message("openhmis.inventory.general.postSearchMessage"),
-                    [self.entity_name]);
             }
 
         self.searchStockOperation = self.searchStockOperation || function(){
@@ -64,7 +61,7 @@
                     stockroom_uuid = $scope.stockroom.uuid;
                 }
 
-                if($scope.operationItem != null){
+                if($scope.searchOperationItem !== '' && $scope.operationItem != null){
                     operationItem_uuid = $scope.operationItem.uuid;
                 }
 
