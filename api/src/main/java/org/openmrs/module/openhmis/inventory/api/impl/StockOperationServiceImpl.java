@@ -664,6 +664,12 @@ public class StockOperationServiceImpl extends BaseOpenmrsService implements ISt
 				} else if (detail.getQuantity() < 0) {
 					stock.getDetails().remove(detail);
 
+                    //Handles restriction of negative stock creation from positive stock
+                    if (ModuleSettings.isNegativeStockRestricted()) {
+                        // Negative item stock is restricted
+                        throw new APIException("Resource stockroom does not have sufficient stock.");
+                    }
+
 					// Set the tx quantity to the number actually deduced from the detail
 					//Math.abs is needed to handle negative adjustments correctly
 					tx.setQuantity(Math.abs(tx.getQuantity()) + detail.getQuantity());
