@@ -82,6 +82,12 @@
         <description>true/false whether or not the system should restrict creation of stock with negative amounts</description>
     </globalProperty>
 
+    <globalProperty>
+        <property>${project.parent.artifactId}.restrictInventoryItemsByLocations</property>
+        <defaultValue>false</defaultValue>
+        <description>true/false whether or not inventory items are restricted to their locations. Applies to non-Superusers only.</description>
+    </globalProperty>
+
 	<!-- Adds link to admin page -->
 	<extension>
 		<point>org.openmrs.admin.list</point>

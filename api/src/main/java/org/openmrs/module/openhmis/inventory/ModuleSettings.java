@@ -35,6 +35,7 @@ public class ModuleSettings {
 	public static final String SHOW_OPERATATION_CANCEL_REASEON_FIELD = "openhmis.inventory.showOperationCancelReason";
 	public static final String RESTRICT_NEGATIVE_INVENTORY_STOCK_CREATION_FIELD =
 	        "openhmis.inventory.restrictNegativeInventoryStockCreation";
+	public static final String RESTRICT_INVENTORY_ITEMS_BY_LOCATION = "openhmis.inventory.restrictInventoryItemsByLocations";
 	private static final String STOCK_OPERATIONS_BY_STOCKROOM_REPORT_ID_PROPERTY =
 	        "openhmis.inventory.reports.stockOperationsByStockroom";
 
@@ -62,6 +63,12 @@ public class ModuleSettings {
 	public static boolean isNegativeStockRestricted() {
 		AdministrationService adminService = Context.getAdministrationService();
 		String property = adminService.getGlobalProperty(RESTRICT_NEGATIVE_INVENTORY_STOCK_CREATION_FIELD);
+		return Boolean.parseBoolean(property);
+	}
+
+	public static boolean areItemsRestrictedByLocation() {
+		AdministrationService adminService = Context.getAdministrationService();
+		String property = adminService.getGlobalProperty(RESTRICT_INVENTORY_ITEMS_BY_LOCATION);
 		return Boolean.parseBoolean(property);
 	}
 
