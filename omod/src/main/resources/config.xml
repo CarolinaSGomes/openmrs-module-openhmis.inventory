@@ -85,7 +85,8 @@
     <globalProperty>
         <property>${project.parent.artifactId}.restrictInventoryItemsByLocations</property>
         <defaultValue>false</defaultValue>
-        <description>true/false whether or not inventory items are restricted to their locations. Applies to non-Superusers only.</description>
+        <description>true/false whether or not inventory items are restricted to their locations. Applies to non-Superusers only.
+            Enabling requires all users to have defaultLocation property (cannot be null).</description>
     </globalProperty>
 
 	<!-- Adds link to admin page -->
