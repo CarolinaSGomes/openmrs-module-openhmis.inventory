@@ -1128,6 +1128,7 @@ public class StockOperationServiceImplTest extends BaseModuleContextSensitiveTes
 		//Ensure that global property is properly set and readable
 		Assert.assertTrue(isNegativeStockRestricted());
 
+		int exceptionCount = 0;
 		try {
 
 			// Set up the reservation transactions (this is normally done in submitOperation)
@@ -1147,12 +1148,98 @@ public class StockOperationServiceImplTest extends BaseModuleContextSensitiveTes
 			Assert.assertNotNull(ex);
 			//Ensuring that the exception is the one we want
 			Assert.assertTrue(ex.getMessage().contains("Resource stockroom does not have sufficient stock."));
+			exceptionCount += 1;
 		}
 
 		// Check the generated pending transactions
 		Set<ReservedTransaction> transactions = op.getReserved();
 		Assert.assertNotNull(transactions);
 		Assert.assertEquals(1, transactions.size());
+		Assert.assertEquals(1, exceptionCount);
+
+		//Disable Global Property just in case
+		adminService.saveGlobalProperty(new GlobalProperty(RESTRICT_NEGATIVE_INVENTORY_STOCK_CREATION_FIELD,
+		        "false"));
+		//Ensure that global property is properly disabled
+		Assert.assertFalse(isNegativeStockRestricted());
+	}
+
+	@Test
+	public void calculateReservations_shouldAllowTransactionWhenGlobalPropertyEnabledAndNetSourceStockWillBePositiveAndRemoving()
+	        throws Exception {
+		//Enable Global Property
+		adminService.saveGlobalProperty(new GlobalProperty(RESTRICT_NEGATIVE_INVENTORY_STOCK_CREATION_FIELD,
+		        "true"));
+
+		// Create a new expirable item
+		Item item = itemTest.createEntity(true);
+		item.setHasExpiration(true);
+		itemDataService.save(item);
+		Context.flushSession();
+
+		// Create a negative item stock (and detail) for the item in a stockroom
+		Stockroom sr = stockroomDataService.getById(0);
+
+		ItemStock stock = new ItemStock();
+		stock.setItem(item);
+		stock.setQuantity(10);
+
+		ItemStockDetail detail = new ItemStockDetail();
+		detail.setStockroom(sr);
+		detail.setItem(item);
+		detail.setBatchOperation(null);
+		detail.setCalculatedBatch(true);
+		detail.setCalculatedExpiration(true);
+		detail.setExpiration(null);
+		detail.setQuantity(10);
+
+		stock.addDetail(detail);
+		sr.addItem(stock);
+
+		stockroomDataService.save(sr);
+		Context.flushSession();
+
+		// Create a new operation to deduct more stock from the stockroom
+		StockOperation op = operationTest.createEntity(true);
+		op.getReserved().clear();
+		op.setStatus(StockOperationStatus.NEW);
+		op.setInstanceType(WellKnownOperationTypes.getDistribution());
+		op.setSource(sr);
+		op.setOperationDate(new Date());
+		op.setDepartment(item.getDepartment());
+		op.addItem(item, 5);
+
+		//Ensure that global property is properly set and readable
+		Assert.assertTrue(isNegativeStockRestricted());
+
+		int exceptionCount = 0;
+		try {
+
+			// Set up the reservation transactions (this is normally done in submitOperation)
+			for (StockOperationItem itemStock : op.getItems()) {
+				ReservedTransaction tx = new ReservedTransaction(itemStock);
+				tx.setCreator(Context.getAuthenticatedUser());
+				tx.setDateCreated(new Date());
+
+				op.addReserved(tx);
+			}
+
+			// Now calculate the actual reservations
+			service.calculateReservations(op);
+
+		} catch (Exception ex) {
+			//Catching the expected exception
+			Assert.assertNotNull(ex);
+			//Ensuring that the exception is the one we want
+			Assert.assertTrue(ex.getMessage().contains("Resource stockroom does not have sufficient stock."));
+			exceptionCount += 1;
+		}
+
+		// Check the generated pending transactions
+		Set<ReservedTransaction> transactions = op.getReserved();
+		Assert.assertNotNull(transactions);
+		Assert.assertEquals(1, transactions.size());
+		Assert.assertEquals(0, exceptionCount);
 
 		//Disable Global Property just in case
 		adminService.saveGlobalProperty(new GlobalProperty(RESTRICT_NEGATIVE_INVENTORY_STOCK_CREATION_FIELD,
