@@ -45,6 +45,7 @@ public class ItemSearchHandler
         implements SearchHandler {
 	private final SearchConfig searchConfig =
 	        new SearchConfig("default", ModuleRestConstants.ITEM_RESOURCE, Arrays.asList("*"),
+
 	                Arrays.asList(
 	                        new SearchQuery.Builder(
 	                                "Find an item by its name or code, optionally filtering by department")

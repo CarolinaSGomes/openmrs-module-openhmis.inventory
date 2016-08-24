@@ -67,32 +67,32 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 		return results;
 	}
 
-    private void locationRestrictionCheck(Criteria criteria){
-        //Checking if Location Restriction is enabled
-        if (ModuleSettings.areItemsRestrictedByLocation()){
-            //Checking if user is Superuser
-            User user = Context.getAuthenticatedUser();
-            if (user.hasRole(RoleConstants.SUPERUSER))
-                return;
-            //Retrieving defaultLocation from user property
-            Location location;
-            try {
-                location = Context.getLocationService().getLocation(
-                        Integer.parseInt(user.getUserProperty("defaultLocation"))
-                );
-            } catch (Exception e) {
-                return;
-            }
+	private void locationRestrictionCheck(Criteria criteria) {
+		//Checking if Location Restriction is enabled
+		if (ModuleSettings.areItemsRestrictedByLocation()) {
+			//Checking if user is Superuser
+			User user = Context.getAuthenticatedUser();
+			if (user.hasRole(RoleConstants.SUPERUSER))
+				return;
+			//Retrieving defaultLocation from user property
+			Location location;
+			try {
+				location = Context.getLocationService().getLocation(
+				    Integer.parseInt(user.getUserProperty("defaultLocation"))
+				        );
+			} catch (Exception e) {
+				return;
+			}
 
-            if (location == null) {
-                // impossible criterion so that no results will be returned
-                criteria.add(Restrictions.isNull("creator"));
-                return;
-            }
+			if (location == null) {
+				// impossible criterion so that no results will be returned
+				criteria.add(Restrictions.isNull("creator"));
+				return;
+			}
 
-            criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location));
-        }
-    }
+			criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location));
+		}
+	}
 
 	@Override
 	@Transactional(readOnly = true)
@@ -107,7 +107,7 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 
 		Criteria criteria = getRepository().createCriteria(getEntityClass());
 		criteria.createAlias("codes", "c").add(Restrictions.ilike("c.code", itemCode));
-        locationRestrictionCheck(criteria);
+		locationRestrictionCheck(criteria);
 
 		return getRepository().selectSingle(getEntityClass(), criteria);
 	}
@@ -131,7 +131,7 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 			@Override
 			public void apply(Criteria criteria) {
 				criteria.createAlias("codes", "c").add(Restrictions.eq("c.code", itemCode));
-                locationRestrictionCheck(criteria);
+				locationRestrictionCheck(criteria);
 				if (!includeRetired) {
 					criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
 				}
@@ -159,7 +159,7 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 			@Override
 			public void apply(Criteria criteria) {
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.DEPARTMENT, department));
-                locationRestrictionCheck(criteria);
+				locationRestrictionCheck(criteria);
 				if (!includeRetired) {
 					criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
 				}
@@ -195,7 +195,7 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.DEPARTMENT, department)).add(
 				    Restrictions.ilike(HibernateCriteriaConstants.NAME, name, MatchMode.START));
 
-                locationRestrictionCheck(criteria);
+				locationRestrictionCheck(criteria);
 				if (!includeRetired) {
 					criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
 				}
@@ -221,7 +221,7 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
-                locationRestrictionCheck(criteria);
+				locationRestrictionCheck(criteria);
 				itemSearch.updateCriteria(criteria);
 			}
 		}, getDefaultSort());
@@ -232,7 +232,7 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 		return executeCriteria(Item.class, new Action1<Criteria>() {
 			@Override
 			public void apply(Criteria criteria) {
-                locationRestrictionCheck(criteria);
+				locationRestrictionCheck(criteria);
 				criteria.add(Restrictions.eq(HibernateCriteriaConstants.CONCEPT, concept));
 			}
 		});
