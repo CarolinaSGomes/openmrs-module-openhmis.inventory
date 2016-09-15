@@ -3,7 +3,7 @@
 <%--@elvariable id="settings" type="org.openmrs.module.openhmis.inventory.api.model.Settings"--%>
 
 <%@ include file="/WEB-INF/template/include.jsp" %>
-<openmrs:require allPrivileges="<%= PrivilegeWebConstants.SETTINGS_PAGE_PRIVILEGES %>" otherwise="/login.htm"
+<openmrs:require allPrivileges="<%= PrivilegeWebConstants.TASK_MANAGE_METADATA %>" otherwise="/login.htm"
                  redirect="<%= ModuleWebConstants.SETTINGS_PAGE %>"/>
 <openmrs:htmlInclude file='<%= request.getContextPath() + ModuleWebConstants.MODULE_RESOURCE_ROOT + "css/style.css" %>'/>
 <openmrs:htmlInclude file='<%= request.getContextPath() + ModuleWebConstants.MODULE_COMMONS_RESOURCE_ROOT + "css/css_2.x/style2x.css" %>'/>
@@ -174,6 +174,18 @@
 						</select>
 					</spring:bind>
 				</td>
+			</tr>
+			<tr>
+				<td>
+					<spring:bind path="autoSelectItemStockFurthestExpirationDate">
+						<input id="autoSelectItemStockFurthestExpirationDate" name="${status.expression}" type="checkbox"
+							   <c:if test="${settings.autoSelectItemStockFurthestExpirationDate}">checked</c:if> />
+						<label class="removeBold" for="autoSelectItemStockFurthestExpirationDate">
+							<spring:message code="openhmis.inventory.settings.autoSelectItemStockFurthestExpirationDate"/>
+						</label>
+					</spring:bind>
+				</td>
+				<td></td>
 			</tr>
 		</table>
 		<br/>

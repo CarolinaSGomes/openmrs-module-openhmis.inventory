@@ -28,16 +28,15 @@
 
 		var self = this;
 
-		var module_name = 'inventory';
 		var entity_name_message_key = "openhmis.inventory.operations.type.name";
-		var rest_entity_name = emr.message("openhmis.inventory.operations.type.name_rest");
-		var cancel_page = 'entities.page';
+		var REST_ENTITY_NAME = "stockOperationType";
 
 		// @Override
 		self.setRequiredInitParameters = self.setRequiredInitParameters
 			|| function () {
-				self.bindBaseParameters(module_name, rest_entity_name,
-					entity_name_message_key, cancel_page);
+				self.bindBaseParameters(INVENTORY_MODULE_NAME, REST_ENTITY_NAME,
+					entity_name_message_key, RELATIVE_CANCEL_PAGE_URL);
+				self.checkPrivileges(TASK_MANAGE_METADATA);
 			}
 
 		self.bindExtraVariablesToScope = self.bindExtraVariablesToScope
@@ -45,23 +44,33 @@
 				var usersLimit = null;
 				var rolesLimit = null;
 				$scope.attributeType = {};
-				OperationTypesRestfulService.loadUsers(module_name, usersLimit, self.onLoadUsersSuccessful);
-				OperationTypesRestfulService.loadRoles(module_name, rolesLimit, self.onLoadRolesSuccessful);
-				OperationTypesRestfulService.loadFormatFields(module_name, self.onLoadFormatFieldsSuccessful);
+				OperationTypesRestfulService.loadUsers(INVENTORY_MODULE_NAME, usersLimit, self.onLoadUsersSuccessful);
+				OperationTypesRestfulService.loadRoles(INVENTORY_MODULE_NAME, rolesLimit, self.onLoadRolesSuccessful);
+				OperationTypesRestfulService.loadFormatFields(INVENTORY_MODULE_NAME, self.onLoadFormatFieldsSuccessful);
 
 				// open dialog box to add an attribute type
 				$scope.addAttributeType = function () {
-					OperationsTypeFunctions.addAttributeType($scope);
+					$scope.editAttributeTypeTitle = '';
+					$scope.addAttributeTypeTitle = $scope.messageLabels['openhmis.commons.general.add']
+						+ ' '
+						+ $scope.messageLabels['openhmis.inventory.attribute.type.name'];
+					EntityFunctions.addAttributeType($scope);
+					EntityFunctions.disableBackground();
 				}
 
 				// deletes an attribute type
 				$scope.removeAttributeType = function (attributeType) {
-					OperationsTypeFunctions.removeAttributeType(attributeType, $scope.entity.attributeTypes);
+					EntityFunctions.removeAttributeType(attributeType, $scope.entity.attributeTypes);
 				}
 
 				// open dialog box to edit an attribute type
 				$scope.editAttributeType = function (attributeType) {
-					OperationsTypeFunctions.editAttributeType(attributeType, $scope);
+					$scope.editAttributeTypeTitle = $scope.messageLabels['openhmis.commons.general.edit']
+						+ ' '
+						+ $scope.messageLabels['openhmis.inventory.attribute.type.name'];
+					$scope.addAttributeTypeTitle = '';
+					EntityFunctions.editAttributeType(attributeType, $scope);
+					EntityFunctions.disableBackground();
 				}
 
 				$scope.delete = self.delete;
@@ -69,6 +78,7 @@
 		
 		// @Override
 		self.onChangeEntityError = self.onChangeEntityError || function (error) {
+				$scope.loading = false;
 				if(error.indexOf("inv_stock_operation_attribute_type") != -1){
 					emr.errorAlert("openhmis.inventory.general.attributeTypeInUse.error");
 				}
@@ -117,12 +127,14 @@
 					$scope.entity.attributeTypes.attributeOrder === null;
 				}
 				// remove temporarily assigned ids from the attribute type array lists.
-				self.removeOperationTypesTemporaryIds();
+				self.removeTemporaryIds();
 				
 				// validate attribute types.
 				if($scope.entity.attributeTypes === ''){
 					$scope.entity.attributeTypes = null;
 				}
+
+				$scope.loading = true;
 				return true;
 			}
 
@@ -138,8 +150,8 @@
 		 * Removes the temporarily assigned unique ids before POSTing data
 		 * @type {Function}
 		 */
-		self.removeOperationTypesTemporaryIds = self.removeOperationTypesTemporaryIds || function () {
-				OperationsTypeFunctions.removeOperationTypesTemporaryId($scope.entity.attributeTypes);
+		self.removeTemporaryIds = self.removeTemporaryIds || function () {
+				EntityFunctions.removeTemporaryId($scope.entity.attributeTypes);
 			}
 
 
