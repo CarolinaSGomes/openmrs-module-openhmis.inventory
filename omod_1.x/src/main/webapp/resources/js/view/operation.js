@@ -422,6 +422,8 @@ define(
                     this.$patientSearch.remove();
                 }
 
+
+
                 // Set up a new patient search selection handler (we don't want to keep the old view)
                 this.patientView = new openhmis.PatientView();
                 openhmis.doSelectionHandler = this.patientView.takeRawPatient;
@@ -474,6 +476,8 @@ define(
                     // Confirm operation type change if there are any defined item stock
                     if (!confirm(openhmis.getMessage('openhmis.inventory.operations.confirm.operationTypeChange'))) {
                         // Set the value back to the previous value
+                        //todo
+                        //this.patientView.render();
                         this.$(event.target).val($.data(event.target, 'current'));
 
                         return false;
@@ -536,7 +540,8 @@ define(
                     var dest = $('select[name="destination"]');
                     var institution = $('select[name="institution"]');
                     var department = $('select[name="department"]');
-                    var patientSearch = self.$("#find-patient");
+                    var patientSearch = self.$("#patientSearch");
+                    var patientfind = self.$("#find-patient");
 
                     source.prop('disabled', !this.currentOperationType.get('hasSource'));
                     if (source.is(":disabled")) {
@@ -552,7 +557,13 @@ define(
                         institution.val(0);
                         department.val(0);
                         patientSearch.hide();
+                        patientfind.hide();
+                        $('.editBillPatient').click();
+
                     } else {
+                    	//place holder for location restricting the endVisit button
+                    	$("button#endVisit").hide();
+
                         patientSearch.show();
 
                         // Update the patient view as the expected elements will no be found

@@ -32,7 +32,14 @@
     <tr>
         <td style="vertical-align: top; width: 250px;">
             <br />
-            <a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_PAGE %>"><spring:message code="openhmis.inventory.admin.pending"/></a><br />
+            <c:choose>
+               	<c:when test="${AutoCompleteOperations}">
+               		<a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_PAGE %>"><spring:message code="openhmis.inventory.admin.current"/></a><br />
+               	</c:when>
+               	<c:otherwise>
+               		<a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_PAGE %>"><spring:message code="openhmis.inventory.admin.pending"/></a><br />
+              	</c:otherwise>
+            </c:choose>
             <b><spring:message code="openhmis.inventory.admin.create"/></b><br />
             <c:if test="${showStockTakeLink}">
 	            <a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_STOCK_TAKE_PAGE %>"><spring:message code="openhmis.inventory.admin.stockTake"/></a><br />

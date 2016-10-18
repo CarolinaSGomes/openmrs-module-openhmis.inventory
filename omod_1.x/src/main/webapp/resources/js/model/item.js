@@ -19,7 +19,9 @@ define(
 		openhmis.url.backboneBase + 'js/lib/i18n',
         openhmis.url.backboneBase + 'js/model/openhmis',
 		openhmis.url.inventoryBase + 'js/model/department',
-        openhmis.url.backboneBase + 'js/model/concept'
+		openhmis.url.inventoryBase + 'js/model/units',
+        openhmis.url.backboneBase + 'js/model/concept',
+        openhmis.url.backboneBase + 'js/model/drug'
 	],
 	function(_, openhmis, __) {
 		openhmis.ItemCode = openhmis.GenericModel.extend({
@@ -50,13 +52,14 @@ define(
 				confirmDelete: openhmis.getMessage('openhmis.inventory.item.delete.confirm.itemPrice')
 			},
 			schema: {
-				name: { type: "Text" },
 				price: {
 					type: 'BasicNumber',
 					validators: [
 						{ type: 'required', message: openhmis.getMessage('openhmis.inventory.item.required.price') }
 					]
-				}
+				},
+				description: {type: "Text",title: "Currency" },
+				name: { type: "Text", title: "Description" }
 			},
 
 		    set: function(key, value, options) {
@@ -81,8 +84,9 @@ define(
 			},
 
 			toString: function() {
+				var currency = this.get("description") ? " "+ this.get("description") : "";
 				var name = this.get("name") ? " (" + this.get("name") + ")" : "";
-				return this.format(this.get('price')) + name;
+				return this.format(this.get('price')) + currency + name;
 			},
 
 			toJSON: function() {
@@ -129,11 +133,20 @@ define(
 				hasExpiration: { type: "TrueFalseCheckbox" },
 				defaultExpirationPeriod: { type: 'DefaultExpirationPeriodStepper' },
 				concept: { type: 'ConceptInput'},
+				drug: { type: 'DrugInput'},
+				units: {
+					type: 'UnitsSelect',
+				 	options: new openhmis.UnitsCollection(null, {
+				 		 url: 'v1/concept/162384AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+					}),
+				 	objRef: true
+				},
 				hasPhysicalInventory: { type: "TrueFalseCheckbox" },
 				minimumQuantity: { type: "BasicNumber" },
 				buyingPrice: { type: "BasicNumber" },
+				buyingCurrency: { type: "Text" },
 				codes: { type: 'List', itemType: 'NestedModel', model: openhmis.ItemCode },
-				prices: { type: 'List', itemType: 'NestedModel', model: openhmis.ItemPrice, subResource: true},
+				prices: { title:'Selling Prices',type: 'List', itemType: 'NestedModel', model: openhmis.ItemPrice, subResource: true},
 				defaultPrice: { type: 'ItemPriceSelect', options: [] }
 			},
 
@@ -245,6 +258,9 @@ define(
 					if (resp.concept && _.isObject(resp.concept)) {
 						resp.concept = new openhmis.Concept(resp.concept);
 					}
+					if (resp.drug && _.isObject(resp.drug)) {
+                    	resp.drug = new openhmis.Drug(resp.drug);
+                    }
 				}
 				return resp;
 			},

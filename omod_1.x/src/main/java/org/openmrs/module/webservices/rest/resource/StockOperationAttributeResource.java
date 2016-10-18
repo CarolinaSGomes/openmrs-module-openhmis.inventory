@@ -38,13 +38,14 @@ public class StockOperationAttributeResource extends BaseRestAttributeObjectReso
 		return null;
 	}
 
+	@Override
 	@PropertyGetter("value")
 	public Object getValue(StockOperationAttribute instance) {
-		return super.baseGetValue(instance);
+		return super.getValue(instance);
 	}
 
 	@PropertySetter("attributeType")
 	public void setAttributeType(StockOperationAttribute instance, StockOperationAttributeType attributeType) {
-		baseSetAttributeType(instance, attributeType);
+		instance.setAttributeType(attributeType);
 	}
 }

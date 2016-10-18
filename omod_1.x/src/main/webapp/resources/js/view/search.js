@@ -84,6 +84,7 @@ define(
 						options.queryString = openhmis.addQueryStringParameter(
 							options.queryString, filter + "=" + encodeURIComponent(this.searchFilter[filter]));
 				}
+				console.log(options);
 				return options;
 			},
 
@@ -112,6 +113,10 @@ define(
 
 			initialize: function(options) {
 				this.events['change #stockroom_uuid'] = 'onFormSubmit';
+        		this.events['change #item-uuid'] = 'onFormSubmit';
+
+        		this.item_uuid = "";
+
 				openhmis.BaseSearchView.prototype.initialize.call(this, options);
 				var stockroomCollection = new openhmis.GenericCollection([], { model: openhmis.Stockroom });
 				stockroomCollection.on("reset", function(collection) {
@@ -124,7 +129,12 @@ define(
 							title: __("Stockroom"),
 							type: "Select",
 							options: stockroomCollection
-						}
+						},
+						q: {
+                            title: __(openhmis.getMessage('openhmis.inventory.item.name')),
+                            type: "Text",
+                            editorClass: "search"
+                        }
 					},
 					data: {}
 				});
@@ -133,7 +143,7 @@ define(
 			/** Collect user input */
 			commitForm: function() {
 				var filters = this.form.getValue();
-				if (!filters.stockroom_uuid)
+				if (!filters.stockroom_uuid && !filters.q)
 					this.searchFilter = undefined;
 				else
 					this.searchFilter = filters;
@@ -148,10 +158,21 @@ define(
 			getFetchOptions: function(options) {
 				options = options ? options : {}
 				if (this.searchFilter) {
-					for (var filter in this.searchFilter)
-						options.queryString = openhmis.addQueryStringParameter(
-							options.queryString, filter + "=" + encodeURIComponent(this.searchFilter[filter]));
+					for (var filter in this.searchFilter){
+						console.log(filter);
+						if (filter == "q") {
+							options.queryString = openhmis.addQueryStringParameter(
+                               	options.queryString, filter + "=" + $("#q").val()
+                            );
+						}else{
+							options.queryString = openhmis.addQueryStringParameter(
+								options.queryString, filter + "=" + encodeURIComponent(this.searchFilter[filter])
+							);
+						}
+
+                	}
 				}
+				console.log(options);
 				return options;
 			},
 
@@ -183,11 +204,24 @@ define(
 					this.form.setValue(this.searchFilter);
 				this.$("form").addClass("inline");
 				this.$("form ul").append('<button id="submit">'+__("Search")+'</button>');
+				this.$("#q").autocomplete({
+                    minLength: 2,
+                    source: doSearch,
+                    select: selectItem
+                })
+                .data("autocomplete")._renderItem = function (ul, item) {
+                    return $("<li></li>").data("item.autocomplete", item)
+                        .append("<a>" + item.label + "</a>").appendTo(ul);
+                };
 				return this;
 			},
 
-			focus: function() {this.$("#stockroom_uuid").focus();}
+			focus: function() {
+				this.$("#stockroom_uuid").focus();
+			}
 		});
+
+
 
 		openhmis.LocationAndNameSearchView = openhmis.BaseSearchView.extend({
 			tmplFile: openhmis.url.inventoryBase + 'template/search.html',
@@ -197,7 +231,9 @@ define(
 				this.events['change #location_uuid'] = 'onFormSubmit';
 				openhmis.BaseSearchView.prototype.initialize.call(this, options);
 				var locationCollection = new openhmis.GenericCollection([], {
-                    model: openhmis.Location,
+					//changed due to kmri 985
+					//model: openhmis.Location
+                    model: openhmis.LocationEdit,
                     limit: openhmis.rest.maxResults
                 });
 				locationCollection.on("reset", function(collection) {
@@ -319,6 +355,14 @@ define(
             STATUSES: ["Any", "Pending", "Completed", "Cancelled", "Rollback"],
 
             initialize: function(options) {
+				var AutoCompleteOperations = $('#AutoCompleteOperations').val();
+
+				if(AutoCompleteOperations){
+					this.STATUSES = ["Any", "Completed", "Rollback"];
+				}else{
+					this.STATUSES = ["Any", "Pending", "Completed", "Cancelled", "Rollback"];
+				}
+
                 this.events['change #operation_status'] = 'onFormSubmit';
                 this.events['change #operationType_uuid'] = 'onFormSubmit';
                 this.events['change #stockroom_uuid'] = 'onFormSubmit';
@@ -376,6 +420,7 @@ define(
                             if (filter == "operation_item") {
                                 options.queryString = openhmis.addQueryStringParameter(options.queryString, "operationItem_uuid" + "=" + $("#item-uuid").val());
                                 this.item_uuid = $("#item-uuid").val();
+
                             } else {
                                 options.queryString = openhmis.addQueryStringParameter(options.queryString, filter + "=" +
                                 encodeURIComponent(this.searchFilter[filter]));
@@ -392,11 +437,12 @@ define(
                 if (this.item_uuid != "") {
                 	$('#item-uuid').val(this.item_uuid);
                 }
+
             },
 
             commitForm: function() {
                 var filters = this.form.getValue();
-
+				console.log(filters);
                 if (!filters.operation_status) {
                     this.searchFilter = undefined;
                 } else {
@@ -417,7 +463,7 @@ define(
                 this.$("#operation_item").autocomplete({
                     minLength: 2,
                     source: doSearch,
-                    select: selectItem
+                    select: selectTransactionItem
                 })
                 .data("autocomplete")._renderItem = function (ul, item) {
                 return $("<li></li>").data("item.autocomplete", item)

@@ -13,15 +13,18 @@
  */
 package org.openmrs.module.webservices.rest.resource;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
 import java.util.Set;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Location;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
@@ -53,6 +56,8 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.EmptySearchResult;
+import org.openmrs.notification.Alert;
+import org.openmrs.util.OpenmrsConstants;
 import org.springframework.web.client.RestClientException;
 
 /**
@@ -132,6 +137,7 @@ public class StockOperationResource
 
 	@Override
 	public StockOperation save(StockOperation operation) {
+		System.out.println("test stock operation submit");
 		// Ensure that the current user can process the operation
 		if (!userCanProcess(operation)) {
 			throw new RestClientException("The current user not authorized to process this operation.");
@@ -142,17 +148,21 @@ public class StockOperationResource
 		// If the status has changed, submit the operation
 		try {
 			if (submitRequired) {
+				System.out.println("#submit");
 				result = operationService.submitOperation(operation);
 			} else if (rollbackRequired) {
+				System.out.println("#rollback");
 				if (!userCanRollback(operation)) {
 					throw new RestClientException("The current user not authorized to rollback this operation.");
 				}
 
 				result = operationService.rollbackOperation(operation);
 			} else {
+				System.out.println("#save");
 				result = super.save(operation);
 			}
 		} finally {
+			System.out.println("#other");
 			submitRequired = false;
 			rollbackRequired = false;
 		}
@@ -184,6 +194,7 @@ public class StockOperationResource
 
 	@PropertySetter("status")
 	public void setStatus(StockOperation operation, StockOperationStatus status) {
+		System.out.println("***status " + status.name());
 		if (operation.getStatus() != status) {
 			if (status == StockOperationStatus.ROLLBACK) {
 				rollbackRequired = true;
@@ -223,9 +234,10 @@ public class StockOperationResource
 		instance.setInstanceType(instanceType);
 	}
 
+	@Override
 	@PropertySetter("attributes")
 	public void setAttributes(StockOperation instance, List<StockOperationAttribute> attributes) {
-		super.baseSetAttributes(instance, attributes);
+		super.setAttributes(instance, attributes);
 	}
 
 	@PropertySetter("operationDate")
@@ -389,6 +401,32 @@ public class StockOperationResource
 		// Process each operation item to set the appropriate fields
 		for (StockOperationItem opItem : items) {
 			Item sourceItem = opItem.getItem();
+
+			//todo find current total
+			//calculate if item is below minimum amount and show alert
+			//added via kmri 746
+
+			String loc = Context.getAuthenticatedUser().getUserProperty(
+			    OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+			Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
+
+			int num = Context.getService(IItemDataService.class).getTotalItemByLocation(sourceItem, ltemp);
+			num += opItem.getQuantity();
+			System.out.println("checking alert " + num + " " + sourceItem.getMinimumQuantity());
+			if (sourceItem.getMinimumQuantity() != null && sourceItem.getMinimumQuantity().intValue() > num) {
+				//get all users by location
+				List<User> userlist = Context.getUserService().getAllUsers();
+				List<User> restricteduserlist = new ArrayList<User>();
+				for (User u : userlist) {
+					String userloc = u.getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+					if (userloc.equals(loc)) {
+						restricteduserlist.add(u);
+					}
+				}
+				System.out.println("alert activated");
+				Context.getAlertService().saveAlert(new Alert("WARNING: Stock is below minimum for "
+				        + sourceItem.getName(), restricteduserlist));
+			}
 
 			if (type.getHasSource()) {
 				// If the operation has a source we will allow an expiration or null, regardless of whether the source

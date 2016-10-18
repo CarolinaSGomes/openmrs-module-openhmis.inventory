@@ -32,8 +32,10 @@ define(
 				location: {
 					type: 'LocationSelect',
 					options: new openhmis.GenericCollection(null, {
-						model: openhmis.Location,
-						url: 'v1/location'
+						model: openhmis.LocationEdit,
+						//kmri 985
+						//url: 'v1/location'
+						url: 'v2/inventory/location'
 					}),
 					objRef: true
 				}
@@ -47,7 +49,7 @@ define(
 			parse: function(resp) {
 				if (resp) {
 					if (resp.location && _.isObject(resp.location)) {
-						resp.location = new openhmis.Location(resp.location);
+						resp.location = new openhmis.LocationEdit(resp.location);
 					}
 				}
 				return resp;
@@ -57,6 +59,14 @@ define(
 				return this.get('name');
 			}
 		});
+
+		openhmis.LocationEdit = openhmis.Location.extend({
+			meta: {
+				//kmri 985
+				//restUrl: 'v1/location'
+				restUrl: 'v2/inventory/location'
+			}
+		}),
 
 		openhmis.ItemStock = openhmis.GenericModel.extend({
 			meta: {

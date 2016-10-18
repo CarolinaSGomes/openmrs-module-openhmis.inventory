@@ -18,7 +18,8 @@ define(
         openhmis.url.backboneBase + 'js/view/openhmis',
         openhmis.url.backboneBase + 'js/view/editors',
         openhmis.url.backboneBase + 'js/lib/backbone-forms',
-        openhmis.url.backboneBase + 'js/model/concept'
+        openhmis.url.backboneBase + 'js/model/concept',
+        openhmis.url.backboneBase + 'js/model/drug'
     ],
     function(openhmis) {
         openhmis.ItemAddEditView = openhmis.GenericAddEditView.extend({
@@ -26,6 +27,7 @@ define(
                 _.bindAll(this);
                 this.events = _.extend({}, this.events, {
                     'click [data-action="remove-concept"]' : 'onRemove',
+                    'click [data-action="remove-drug"]' : 'onRemoveDrug',
                     'change [name="hasExpiration"]' : 'showDefaultExpirationPeriodField'
                 });
                 openhmis.GenericAddEditView.prototype.initialize.call(this, options);
@@ -95,7 +97,14 @@ define(
                 $('#conceptBox').show();
                 this.modelForm.fields.concept.editor.value = '';
             },
-            
+
+            onRemoveDrug: function() {
+                $('#drugLink').hide();
+                $('#drugMessage').hide();
+                $('#drugBox').show();
+                this.modelForm.fields.drug.editor.value = '';
+            },
+
             edit: function(model) {
             	this.model = model;
 				var self = this;
@@ -115,7 +124,16 @@ define(
 	                    				'<a href="/openmrs/module/openhmis/backboneforms/concept.form?conceptUuid=' + 
 	                    				concept.attributes.uuid +'" target="_blank">' + concept.attributes.display +'</a>');
 		                }
-		                
+
+						if (model.attributes.drug != null) {
+							var drug = model.attributes.drug;
+		                     $('#drugBox').hide();
+		                     $('#drugLink').append('<button type="button" data-action="remove-drug" class="bbf-remove" title="Remove">×</button>' +
+	                    				'<a href="/openmrs/module/openhmis/backboneforms/drug.form?drugUuid=' +
+	                    				drug.attributes.uuid +'" target="_blank">' + drug.attributes.display +'</a>');
+		                }
+
+
 						$(self.formEl).show();
 						$(self.retireVoidPurgeEl).show();
 						$(self.formEl).find('input')[0].focus();
@@ -151,6 +169,12 @@ define(
                     this.modelForm.fields.concept.editor.value = this.modelForm.fields.concept.editor.value.uuid
                 } else {
                     this.modelForm.fields.concept.editor.value = this.$('#concept').val();
+                }
+
+                if(this.modelForm.fields.drug.editor.value && _.isObject(this.modelForm.fields.drug.editor.value)) {
+                    this.modelForm.fields.drug.editor.value = this.modelForm.fields.drug.editor.value.uuid
+                } else {
+                    this.modelForm.fields.drug.editor.value = this.$('#drug').val();
                 }
 
                 // Load the attributes and set in the model

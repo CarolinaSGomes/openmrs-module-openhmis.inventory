@@ -100,6 +100,7 @@ public class StockOperationServiceImpl extends BaseOpenmrsService implements ISt
 		}
 
 		IStockOperationType type = operation.getInstanceType();
+		System.out.println("operation type: " + type.getName());
 		if (type.getHasSource() && operation.getSource() == null) {
 			throw new APIException("The operation type (" + type.getName() + ") requires a source stockroom "
 			        + "but one has not been defined.");

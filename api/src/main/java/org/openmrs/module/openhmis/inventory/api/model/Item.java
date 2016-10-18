@@ -20,6 +20,8 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.openmrs.Concept;
+import org.openmrs.Drug;
+import org.openmrs.Location;
 import org.openmrs.module.openhmis.commons.api.entity.model.BaseSimpleCustomizableMetadata;
 import org.openmrs.module.openhmis.commons.api.entity.model.ISimpleCustomizable;
 
@@ -34,6 +36,8 @@ public class Item extends BaseSimpleCustomizableMetadata<ItemAttribute> implemen
 	private Set<ItemPrice> prices;
 	private Department department;
 	private Concept concept;
+	private Drug drug;
+	private Concept units;
 	private ItemPrice defaultPrice;
 	private Boolean hasExpiration;
 	private Integer defaultExpirationPeriod;
@@ -41,6 +45,8 @@ public class Item extends BaseSimpleCustomizableMetadata<ItemAttribute> implemen
 	private Boolean hasPhysicalInventory;
 	private Boolean conceptAccepted;
 	private BigDecimal buyingPrice;
+	private String buyingCurrency;
+	private Location location;
 
 	public Item() {}
 
@@ -158,6 +164,22 @@ public class Item extends BaseSimpleCustomizableMetadata<ItemAttribute> implemen
 		this.concept = concept;
 	}
 
+	public Drug getDrug() {
+		return drug;
+	}
+
+	public void setDrug(Drug drug) {
+		this.drug = drug;
+	}
+
+	public Concept getUnits() {
+		return units;
+	}
+
+	public void setUnits(Concept units) {
+		this.units = units;
+	}
+
 	public Boolean getHasPhysicalInventory() {
 		return hasPhysicalInventory;
 	}
@@ -216,6 +238,22 @@ public class Item extends BaseSimpleCustomizableMetadata<ItemAttribute> implemen
 
 	public void setBuyingPrice(BigDecimal buyingPrice) {
 		this.buyingPrice = buyingPrice;
+	}
+
+	public void setBuyingCurrency(String c) {
+		buyingCurrency = c;
+	}
+
+	public String getBuyingCurrency() {
+		return buyingCurrency;
+	}
+
+	public void setLocation(Location l) {
+		location = l;
+	}
+
+	public Location getLocation() {
+		return location;
 	}
 
 	@Override

@@ -13,7 +13,7 @@
   -->
 <script id="defaultExpirationPeriodStepper-editor" type="text/template">
     <input type="number" id="defaultExpirationPeriod" name="defaultExpirationPeriod" style="width: 50px" value="<?= (defaultExpirationPeriod != null) ? defaultExpirationPeriod : '' ?>">
-	<span id="defaultExpirationPeriodUnits">month(s)</span>
+    <span id="defaultExpirationPeriodUnits">month(s)</span>
     <div id="defaultExpirationPeriodText"></div>
 </script>
 
@@ -23,6 +23,16 @@
     <div id="conceptBox">
         <input type="text" id="conceptDisplay" value="" class="concept-display" placeholder="Enter concept name"/>
         <input type="hidden" id="concept" name="concept" value="" class="concept"/>
+        <div class="spinner spinner-align"></div>
+    </div>
+</script>
+
+<script id="drugInput" type="text/template">
+    <div id="drugLink"></div>
+    <div id="drugMessage"></div>
+    <div id="drugBox">
+        <input type="text" id="drugDisplay" value="" class="drug-display" placeholder="Enter drug name"/>
+        <input type="hidden" id="drug" name="drug" value="" class="drug"/>
         <div class="spinner spinner-align"></div>
     </div>
 </script>

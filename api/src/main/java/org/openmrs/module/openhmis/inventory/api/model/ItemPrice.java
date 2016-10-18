@@ -38,6 +38,14 @@ public class ItemPrice extends BaseSerializableOpenmrsMetadata {
 		setName(name);
 	}
 
+	public ItemPrice(BigDecimal price, String currency, String name) {
+		super();
+
+		this.price = price;
+		setDescription(currency);
+		setName(name);
+	}
+
 	@Override
 	public Integer getId() {
 		return itemPriceId;
@@ -62,5 +70,13 @@ public class ItemPrice extends BaseSerializableOpenmrsMetadata {
 
 	public void setPrice(BigDecimal price) {
 		this.price = price;
+	}
+
+	public void setCurrency(String currency) {
+		setDescription(currency);
+	}
+
+	public String getCurrency() {
+		return getDescription();
 	}
 }

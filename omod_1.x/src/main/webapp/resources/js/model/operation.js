@@ -183,6 +183,7 @@ define(
 				    }
 
 				    if (resp.patient && _.isObject(resp.patient)) {
+				    	console.log("patient test 1");
 					    resp.patient = new openhmis.Patient(resp.patient);
 				    }
 
@@ -304,6 +305,7 @@ define(
                         resp.institution = new openhmis.Institution(resp.institution);
                     }
                     if (resp.patient) {
+                    	console.log("resp patient");
                         resp.patient = new openhmis.Patient(resp.patient);
                     }
                     if (resp.department) {
@@ -328,6 +330,7 @@ define(
                     return null;
                 }
 
+				//operation must have an operation number
                 var errors = [];
                 var operationNumber = this.get("operationNumber");
                 if (operationNumber === undefined || operationNumber === '') {
@@ -337,7 +340,9 @@ define(
                     });
                 }
 
+
                 if (this.get("instanceType") === undefined) {
+                	//operation must have an operation type
                     errors.push({
                         selector: ".field-instanceType",
                         message: openhmis.getMessage('openhmis.inventory.operations.error.type')
@@ -369,8 +374,10 @@ define(
                         var institution = this.get('institution');
                         var department = this.get('department');
                         var patient = this.get('patient');
-
+						console.log("pat "+patient);
                         // Either an institution, department, or patient must be defined
+                        // cannot have more than one
+                        // note the department validation has been disabled in kmri version
                         if ((!institution || institution.id === "") &&
                             (!department || department.id === "") &&
                             (!patient || patient.id === "")) {
@@ -381,23 +388,24 @@ define(
                         } else {
                             var defined = 0;
                             defined += institution && institution.id !== "" ? 1 : 0;
-                            defined += department && department.id !== "" ? 1 : 0;
+                            //defined += department && department.id !== "" ? 1 : 0;
                             defined += patient && patient.id !== "" ? 1 : 0;
 
                             if (defined > 1) {
                                 errors.push({
                                     selector: ".field-institution",
-                                    message: openhmis.getMessage('openhmis.inventory.operations.error.prefix') + operationType.get("name") + " " + openhmis.getMessage('openhmis.inventory.operations.required.variables')
+                                    //message: openhmis.getMessage('openhmis.inventory.operations.error.prefix') + operationType.get("name") + " " + openhmis.getMessage('openhmis.inventory.operations.required.variables')
+                                	//message changed as part of kmri 799
+                                	message: 'This form requires either a patient or an institution but not both'
                                 });
                             }
-                        }
-                    }
+                    	}
+                	}
                 }
-
                 // TODO: Should the operation type user/role check happen here?
-
                 var items = this.get("items");
                 if (items === undefined || items.length === 0) {
+                	console.log("items are too low");
                     errors.push({
                         selector: ".item-stock",
                         message: openhmis.getMessage('openhmis.inventory.operations.error.itemQuantity'),

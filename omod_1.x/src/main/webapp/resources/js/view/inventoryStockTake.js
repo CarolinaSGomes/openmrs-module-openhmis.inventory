@@ -138,6 +138,9 @@ define(
             render: function() {
                 openhmis.GenericSearchableListView.prototype.render.call(this);
                 this.renderAdjustmentChangesShort();
+                if($('#stockroom_uuid').val()=="" || $('#stockroom_uuid').val() == null){
+                     $('.actual-quantity').prop( "disabled", true );
+                }
             },
 
             updateGlobalStockTakeChangeCounter: function() {

@@ -15,4 +15,5 @@
 	openhmis.url.inventoryBase = "inventory/";
     openhmis.url.inventoryModelBase = "v2/" + openhmis.url.inventoryBase;
 	openhmis.url.inventory = openhmis.url.resources + openhmis.url.inventoryBase;
+	openhmis.url.conceptdoseunits = 'v1/concept/162384AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 })();

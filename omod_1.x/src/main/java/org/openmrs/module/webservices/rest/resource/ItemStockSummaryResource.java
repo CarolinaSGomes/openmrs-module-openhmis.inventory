@@ -16,6 +16,7 @@ package org.openmrs.module.webservices.rest.resource;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.Utility;
@@ -33,6 +34,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
+import org.openmrs.util.OpenmrsConstants;
 
 /**
  * REST resource representing an {@link ItemStockSummary}.
@@ -72,27 +74,54 @@ public class ItemStockSummaryResource extends DelegatingCrudResource<ItemStockSu
 
 	@Override
 	protected PageableResult doSearch(RequestContext context) {
+		String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+		Location location = Context.getLocationService().getLocation(Integer.parseInt(loc));
+
 		PageableResult result;
 
 		String stockroomUuid = context.getParameter("stockroom_uuid");
+		List<ItemStockSummary> itemStockSummaries;
+		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+		String itemRestriction = context.getParameter("q");
 		if (StringUtils.isNotBlank(stockroomUuid)) {
-			PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 			Stockroom stockroom = stockroomDataService.getByUuid(stockroomUuid);
-			List<ItemStockSummary> itemStockSummaries =
-			        itemStockDetailDataService.getItemStockSummaryByStockroom(stockroom, pagingInfo);
-			result =
-			        new AlreadyPagedWithLength<ItemStockSummary>(context, itemStockSummaries, pagingInfo.hasMoreResults(),
-			                pagingInfo.getTotalRecordCount());
+			if (itemRestriction.equals("")) {
+				itemStockSummaries =
+				        itemStockDetailDataService.getItemStockSummaryByStockroom(stockroom, pagingInfo);
+			} else {
+				itemStockSummaries =
+				        itemStockDetailDataService.getItemStockSummaryByStockroom(stockroom, itemRestriction, pagingInfo);
+			}
+
 		} else {
-			result = super.doSearch(context);
+			itemStockSummaries =
+			        itemStockDetailDataService.getItemStockSummaryByLocation(location, itemRestriction, pagingInfo);
 		}
+
+		result =
+		        new AlreadyPagedWithLength<ItemStockSummary>(context, itemStockSummaries, pagingInfo.hasMoreResults(),
+		                pagingInfo.getTotalRecordCount());
 
 		return result;
 	}
 
 	@Override
 	public SimpleObject getAll(RequestContext context) throws ResponseException {
-		return new SimpleObject();
+		String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+		Location location = Context.getLocationService().getLocation(Integer.parseInt(loc));
+
+		PageableResult result;
+
+		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+		List<ItemStockSummary> itemStockSummaries;
+		itemStockSummaries =
+		        itemStockDetailDataService.getItemStockSummaryByLocation(location, pagingInfo);
+
+		result =
+		        new AlreadyPagedWithLength<ItemStockSummary>(context, itemStockSummaries, pagingInfo.hasMoreResults(),
+		                pagingInfo.getTotalRecordCount());
+
+		return result.toSimpleObject(this);
 	}
 
 	@Override

@@ -24,6 +24,7 @@ public class HibernateCriteriaConstants {
 	public static final String RETIRED = "retired";
 	public static final String NAME = "name";
 	public static final String CONCEPT = "concept";
+	public static final String DRUG = "drug";
 	public static final String CONCEPT_ACCEPTED = "conceptAccepted";
 	public static final String STOCKROOM = "stockroom";
 	public static final String DATE_CREATED = "dateCreated";

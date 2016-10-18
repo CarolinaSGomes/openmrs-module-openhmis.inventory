@@ -13,13 +13,14 @@
  */
 package org.openmrs.module.webservices.rest.search;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.search.BaseObjectTemplateSearch;
-import org.openmrs.module.openhmis.inventory.ModuleSettings;
 import org.openmrs.module.openhmis.inventory.api.IDepartmentDataService;
 import org.openmrs.module.openhmis.inventory.api.IItemDataService;
 import org.openmrs.module.openhmis.inventory.api.model.Department;
@@ -34,6 +35,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchConfig;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchHandler;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchQuery;
+import org.openmrs.util.OpenmrsConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -71,11 +73,14 @@ public class ItemSearchHandler
 
 		String hasPhysicalInventoryString = context.getParameter("has_physical_inventory");
 		Boolean hasPhysicalInventory = null;
-		if (StringUtils.isNotEmpty(hasPhysicalInventoryString)) {
+		if (!StringUtils.isEmpty(hasPhysicalInventoryString)) {
 			hasPhysicalInventory = Boolean.parseBoolean(hasPhysicalInventoryString);
 		}
 
-		Department department = getOptionalEntityByUuid(departmentService, context.getParameter("department_uuid"));
+		Department department = getOptionalEntityByUuid(departmentService,
+		    context.getParameter("department_uuid"));
+		String userlocation = Context.getAuthenticatedUser().
+		        getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
 
 		List<Item> items = null;
 		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
@@ -84,14 +89,14 @@ public class ItemSearchHandler
 		if (department == null && hasPhysicalInventory == null) {
 			if (query != null) {
 				// Try searching by code
-				items = service.getItemsByCode(query, context.getIncludeAll(), pagingInfo);
+				items = service.getItemsByCode(query, context.getIncludeAll());
 			}
 
 			if (items == null || items.size() == 0) {
 				//new paging info as otherwise the old one is used and paging does not work
 				pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 				// If no items are found, search by name
-				items = service.getByNameFragment(query, context.getIncludeAll(), pagingInfo);
+				items = service.getByNameFragment(query, context.getIncludeAll());
 			}
 		} else {
 			// Create the item search template with the specified parameters
@@ -100,22 +105,61 @@ public class ItemSearchHandler
 			items = service.getItemsByItemSearch(search, pagingInfo);
 		}
 
+		/*
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getDepartment() == null) {
+				System.out.println(items.get(i).getName() + " " + "department null");
+			} else if (items.get(i).getDepartment().getLocation() == null) {
+				System.out.println(items.get(i).getName() + " " + "location null");
+			} else {
+				System.out.println(items.get(i).getName() + " " + items.get(i).getDepartment().getLocation().getName());
+			}
+		}
+		*/
+
+		items = filterItemsByLocation(items, Integer.parseInt(userlocation));
+		int numresults = items.size();
+
+		for (int i = 1; i < context.getStartIndex().intValue(); i++) {
+			items.remove(0);
+		}
+
+		while (items.size() > context.getLimit().intValue()) {
+			items.remove(context.getLimit().intValue());
+		}
+
+		int page = (int)(context.getStartIndex().intValue() / context.getLimit().intValue() + 1);
+		boolean hasmoreresults = (page * context.getLimit().intValue()) < items.size();
+
+		/*
 		return new AlreadyPagedWithLength<Item>(context, items, pagingInfo.hasMoreResults(),
 		        pagingInfo.getTotalRecordCount());
+		*/
+
+		return new AlreadyPagedWithLength<Item>(context, items, hasmoreresults, numresults);
+	}
+
+	public List<Item> filterItemsByLocation(List<Item> item, int location) {
+		List<Item> outputlist = new ArrayList<Item>();
+		for (int i = 0; i < item.size(); i++) {
+			if (item.get(i).getDepartment() == null) {
+				//System.out.println("department null");
+			} else if (item.get(i).getDepartment().getLocation() == null) {
+				//System.out.println("location null");
+			} else if (item.get(i).getDepartment().getLocation().getId() == location) {
+				outputlist.add(item.get(i));
+			}
+		}
+		return outputlist;
 	}
 
 	private ItemSearch createSearchTemplate(RequestContext context, String name, Department department,
 	        Boolean hasPhysicalInventory) {
 		ItemSearch template = new ItemSearch();
 
-		if (StringUtils.isNotEmpty(name)) {
+		if (!StringUtils.isEmpty(name)) {
 			template.setNameComparisonType(BaseObjectTemplateSearch.StringComparisonType.LIKE);
-			if (ModuleSettings.useWildcardItemSearch()) {
-				template.getTemplate().setName("%" + name + "%");
-			} else {
-				template.getTemplate().setName(name + "%");
-			}
-
+			template.getTemplate().setName(name + "%");
 		}
 
 		template.getTemplate().setDepartment(department);

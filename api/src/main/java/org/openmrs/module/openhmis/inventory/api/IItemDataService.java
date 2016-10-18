@@ -16,6 +16,8 @@ package org.openmrs.module.openhmis.inventory.api;
 import java.util.List;
 
 import org.openmrs.Concept;
+import org.openmrs.Drug;
+import org.openmrs.Location;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService;
@@ -157,6 +159,27 @@ public interface IItemDataService extends IMetadataDataService<Item> {
 	List<Item> getItemsByItemSearch(ItemSearch itemSearch, PagingInfo pagingInfo);
 
 	/**
+	 * Gets all items using the specified {@link ItemSearch} settings.
+	 * @param itemSearch The item search settings.
+	 * @param pagingInfo The paging information.
+	 * @return The items found or an empty list if no items were found.
+	 * @should throw NullPointerException if item search is null
+	 * @should throw NullPointerException if item search template object is null
+	 * @should return an empty list if no items are found via the search
+	 * @should return items filtered by name
+	 * @should return items filtered by department
+	 * @should return items filtered by concept
+	 * @should return items filtered by physical inventory
+	 * @should return items filtered by expiration
+	 * @should return all items if paging is null
+	 * @should return paged items if paging is specified
+	 * @should not return retired items from search unless specified
+	 */
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
+	List<Item> getItemsByItemSearch(ItemSearch itemSearch, boolean getRetired, PagingInfo pagingInfo);
+
+	/**
 	 * Gets all items by {@link Concept} settings.
 	 * @param concept The concept.
 	 * @return The items found or an empty list if no items were found.
@@ -187,4 +210,46 @@ public interface IItemDataService extends IMetadataDataService<Item> {
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
 	ItemPrice getItemPriceByUuid(String uuid);
+
+	/**
+	 * Gets all the stockrooms for the specified {@link Location}.
+	 * @param location The location.
+	 * @param includeRetired Whether retired stockrooms should be included in the results.
+	 * @return All stockrooms for the specified {@link Location}.
+	 * @should throw NullPointerException if the location is null
+	 * @should return an empty list if the location has no stockrooms
+	 * @should not return retired stockrooms unless specified
+	 * @should return all stockrooms for the specified location
+	 */
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_STOCKROOMS })
+	List<Item> getItemsByLocation(Location location, boolean includeRetired);
+
+	/**
+	 * Gets all the stockrooms for the specified {@link Location}.
+	 * @param location The location.
+	 * @param includeRetired Whether retired stockrooms should be included in the results.
+	 * @param pagingInfo The paging information
+	 * @return All stockrooms for the specified {@link location}.
+	 */
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
+	List<Item> getItemsByLocation(Location location, boolean includeRetired,
+	        PagingInfo pagingInfo);
+
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
+	int getTotalItemByLocation(Item item, Location location);
+
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
+	List<Item> listItemsByDrugId(Integer drugid);
+
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
+	List<Item> listItemsByDrugId(Drug drug);
+
+	@Transactional
+	@Authorized({ PrivilegeConstants.MANAGE_ITEMS })
+	Boolean dispenseItem(Integer id, Integer quantity);
 }

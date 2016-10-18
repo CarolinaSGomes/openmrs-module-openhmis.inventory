@@ -17,6 +17,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.jasperreport.JasperReportService;
 import org.openmrs.module.openhmis.commons.api.exception.ReportNotFoundException;
@@ -25,6 +26,7 @@ import org.openmrs.module.openhmis.inventory.api.IStockroomDataService;
 import org.openmrs.module.openhmis.inventory.api.WellKnownOperationTypes;
 import org.openmrs.module.openhmis.inventory.api.model.Settings;
 import org.openmrs.module.openhmis.inventory.web.ModuleWebConstants;
+import org.openmrs.util.OpenmrsConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,7 +46,12 @@ public class InventoryReportsController {
 		Settings settings = ModuleSettings.loadSettings();
 		IStockroomDataService stockroomDataService = Context.getService(IStockroomDataService.class);
 
-		Integer reportId = settings.getStockTakeReportId();
+		Integer reportId = settings.getStockLowReportId();
+		if (reportId != null) {
+			handleReport(model, reportId, "stockLowReport");
+		}
+
+		reportId = settings.getStockTakeReportId();
 		if (reportId != null) {
 			handleReport(model, reportId, "stockTakeReport");
 		}
@@ -71,7 +78,11 @@ public class InventoryReportsController {
 
 		model.addAttribute("showStockTakeLink", Context.getAuthenticatedUser() != null
 		        && WellKnownOperationTypes.getAdjustment().userCanProcess(Context.getAuthenticatedUser()));
-		model.addAttribute("stockrooms", stockroomDataService.getAll());
+
+		String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+		Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
+		model.addAttribute("stockrooms", stockroomDataService.getStockroomsByLocation(ltemp, false));
+		model.addAttribute("AutoCompleteOperations", ModuleSettings.loadSettings().getAutoCompleteOperations());
 	}
 
 	private void handleReport(ModelMap model, Integer reportId, String reportName) {

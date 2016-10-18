@@ -38,6 +38,7 @@ public class InventoryPageController {
 		        && WellKnownOperationTypes.getAdjustment().userCanProcess(Context.getAuthenticatedUser()));
 		model.addAttribute("isOperationAutoCompleted", ModuleSettings.isOperationAutoCompleted());
 		model.addAttribute("showOperationCancelReasonField", ModuleSettings.showOperationCancelReasonField());
+		model.addAttribute("AutoCompleteOperations", ModuleSettings.loadSettings().getAutoCompleteOperations());
 	}
 
 }

@@ -21,11 +21,16 @@
 		<property name="conceptAccepted" type="boolean" column="concept_accepted" />
 		<property name="minimumQuantity" type="int" column="minimum_quantity" />
 		<property name="buyingPrice" type="java.math.BigDecimal" column="buying_price" />
+        <property name="buyingCurrency" type="java.lang.String" column="buying_currency" />
 
 		<!-- Associations -->
 		<many-to-one name="department" class="Department" column="department_id" />
 		<many-to-one name="defaultPrice" class="ItemPrice" column="default_price_id" />
 		<many-to-one name="concept" class="org.openmrs.Concept" column="concept_id" />
+        <many-to-one name="drug" class="org.openmrs.Drug" column="drug_id" />
+        <many-to-one name="location" class="org.openmrs.Location" column="location_id" />
+        <many-to-one name="units" class="org.openmrs.Concept" column="units" />
+
 
 		<set name="attributes" lazy="false" fetch="subselect" inverse="true" cascade="all-delete-orphan">
 			<key column="item_id" />

@@ -22,7 +22,14 @@
         <td style="vertical-align: top; width: 250px;">
             <br />
             <b>
-            <spring:message code="openhmis.inventory.admin.pending"/>
+            <c:choose>
+            	<c:when test="${AutoCompleteOperations}">
+            		<spring:message code="openhmis.inventory.admin.current"/>
+            	</c:when>
+            	<c:otherwise>
+            		<spring:message code="openhmis.inventory.admin.pending"/>
+            	</c:otherwise>
+        	</c:choose>
         </b>
             <br />
             <a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_CREATION_PAGE %>"><spring:message code="openhmis.inventory.admin.create"/></a><br />
@@ -38,5 +45,6 @@
         </td>
     </tr>
 </table>
+<input id="AutoCompleteOperations" type="hidden" value="${AutoCompleteOperations}"></input>
 
 <%@ include file="/WEB-INF/template/footer.jsp" %>

@@ -21,7 +21,15 @@
   <tr>
     <td style="vertical-align: top; width: 250px;">
       <br />
-      <a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_PAGE %>"><spring:message code="openhmis.inventory.admin.pending"/></a><br />
+
+      <c:choose>
+       	<c:when test="${AutoCompleteOperations}">
+       		<a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_PAGE %>"><spring:message code="openhmis.inventory.admin.current"/></a><br />
+       	</c:when>
+       	<c:otherwise>
+       		<a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_PAGE %>"><spring:message code="openhmis.inventory.admin.pending"/></a><br />
+       	</c:otherwise>
+      </c:choose>
       <a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_CREATION_PAGE %>"><spring:message code="openhmis.inventory.admin.create"/></a><br />
       <c:if test="${showStockTakeLink}">
           <a href="${pageContext.request.contextPath}<%= ModuleWebConstants.INVENTORY_STOCK_TAKE_PAGE %>"><spring:message code="openhmis.inventory.admin.stockTake"/></a><br />
@@ -31,9 +39,26 @@
       </b>
     </td>
     <td>
-      <c:if test="${stockTakeReport == null && stockCardReport == null && stockroomReport == null && expiringStockReport == null}" >
+
+      <c:if test="${stockLowReport == null && stockTakeReport == null && stockCardReport == null && stockroomReport == null && expiringStockReport == null}" >
         <div style="color: grey">No inventory reports have been defined.</div>
       </c:if>
+
+      <c:if test="${stockLowReport != null}" >
+        <h3>${stockLowReport.name}</h3>
+        <div style="color: grey">${stockLowReport.description}</div>
+        <br />
+        <div>
+          <form id="stockLowReport" onsubmit="return false;">
+            <input id="stockLowReportId" type="hidden" value="${stockLowReport.reportId}" />
+            <br /><br />
+            <input id="generateLowReport" type="submit" value="Generate Report"/>
+          </form>
+        </div>
+        <br />
+        <hr>
+      </c:if>
+
       <c:if test="${stockTakeReport != null}" >
         <h3>${stockTakeReport.name}</h3>
         <div style="color: grey">${stockTakeReport.description}</div>

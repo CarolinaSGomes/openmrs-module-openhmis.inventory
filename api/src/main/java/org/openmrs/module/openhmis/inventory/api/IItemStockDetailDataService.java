@@ -15,6 +15,7 @@ package org.openmrs.module.openhmis.inventory.api;
 
 import java.util.List;
 
+import org.openmrs.Location;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.IObjectDataService;
@@ -48,9 +49,23 @@ public interface IItemStockDetailDataService extends IObjectDataService<ItemStoc
 	 * @should return an empty list if no records are found
 	 * @should return the item stock summary records
 	 * @should return paged results if paging is specified
-	 * @should return correctly paged results when aggregate qty is zero
 	 */
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.VIEW_METADATA })
 	List<ItemStockSummary> getItemStockSummaryByStockroom(Stockroom stockroom, PagingInfo pagingInfo);
+
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_METADATA })
+	List<ItemStockSummary> getItemStockSummaryByStockroom(Stockroom stockroom,
+	        String itemQuery, PagingInfo pagingInfo);
+
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_METADATA })
+	List<ItemStockSummary> getItemStockSummaryByLocation(Location location, PagingInfo pagingInfo);
+
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_METADATA })
+	List<ItemStockSummary> getItemStockSummaryByLocation(Location location,
+	        String itemQuery, PagingInfo pagingInfo);
+
 }

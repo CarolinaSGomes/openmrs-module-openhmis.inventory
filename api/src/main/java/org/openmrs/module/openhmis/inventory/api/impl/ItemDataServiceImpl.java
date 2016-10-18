@@ -18,29 +18,49 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.xml.serialize.Method;
 import org.hibernate.Criteria;
+import org.hibernate.Hibernate;
+import org.hibernate.Query;
+import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.openmrs.Concept;
+import org.hibernate.transform.Transformers;
+import org.hibernate.type.IntegerType;
+import org.openmrs.Drug;
 import org.openmrs.Location;
 import org.openmrs.OpenmrsObject;
+import org.openmrs.Concept;
 import org.openmrs.User;
+//import org.openmrs.Drug;
+//import org.openmrs.Location;
+//import org.openmrs.OpenmrsObject;
+//import org.openmrs.Concept;
+//import org.openmrs.User;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.impl.AdministrationServiceImpl;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.impl.BaseCustomizableMetadataDataServiceImpl;
 import org.openmrs.module.openhmis.commons.api.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.openhmis.commons.api.f.Action1;
 import org.openmrs.module.openhmis.inventory.ModuleSettings;
 import org.openmrs.module.openhmis.inventory.api.IItemDataService;
+import org.openmrs.module.openhmis.inventory.api.IItemStockDataService;
 import org.openmrs.module.openhmis.inventory.api.model.Department;
 import org.openmrs.module.openhmis.inventory.api.model.Item;
 import org.openmrs.module.openhmis.inventory.api.model.ItemPrice;
+import org.openmrs.module.openhmis.inventory.api.model.ItemStock;
 import org.openmrs.module.openhmis.inventory.api.search.ItemSearch;
 import org.openmrs.module.openhmis.inventory.api.util.HibernateCriteriaConstants;
 import org.openmrs.module.openhmis.inventory.api.util.PrivilegeConstants;
 import org.openmrs.util.RoleConstants;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.criteria.JoinType;
 
 /**
  * Data service implementation class for {@link Item}s.
@@ -48,6 +68,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl<Item>
         implements IItemDataService, IMetadataAuthorizationPrivileges {
+	private static final Log LOG = LogFactory.getLog(ItemDataServiceImpl.class);
 
 	private static final int MAX_ITEM_CODE_LENGTH = 255;
 
@@ -228,6 +249,28 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 	}
 
 	@Override
+	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
+	public List<Item> getItemsByItemSearch(final ItemSearch itemSearch, final boolean getRetired, PagingInfo pagingInfo) {
+		System.out.println("search items with query retired and pageing");
+		if (itemSearch == null) {
+			throw new NullPointerException("The item search must be defined.");
+		} else if (itemSearch.getTemplate() == null) {
+			throw new NullPointerException("The item search template must be defined.");
+		}
+
+		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
+			@Override
+			public void apply(Criteria criteria) {
+				itemSearch.updateCriteria(criteria);
+				locationRestrictionCheck(criteria);
+				if (!getRetired) {
+					criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
+				}
+			}
+		}, getDefaultSort());
+	}
+
+	@Override
 	public List<Item> getItemsByConcept(final Concept concept) {
 		return executeCriteria(Item.class, new Action1<Criteria>() {
 			@Override
@@ -263,6 +306,143 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 				}
 			}
 		}, getDefaultSort());
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
+	public List<Item> getItemsByLocation(Location location, boolean includeRetired) {
+		return getItemsByLocation(location, includeRetired, null);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
+	public List<Item> getItemsByLocation(final Location location, final boolean includeRetired,
+	        PagingInfo pagingInfo) {
+		if (location == null) {
+			throw new NullPointerException("The location must be defined");
+		}
+
+		return executeCriteria(Item.class, pagingInfo, new Action1<Criteria>() {
+			@Override
+			public void apply(Criteria criteria) {
+				criteria.createAlias("department", "departmentref");
+				criteria.add(Restrictions.eq("departmentref.location", location));
+				if (!includeRetired) {
+					criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
+				}
+			}
+		}, getDefaultSort());
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
+	public int getTotalItemByLocation(final Item item, final Location location) {
+		if (item == null) {
+			throw new NullPointerException("The item must be defined");
+		}
+		if (location == null) {
+			throw new NullPointerException("The location must be defined");
+		}
+
+		Criteria criteria = getRepository().createCriteria(ItemStock.class);
+		criteria.createAlias("item", "it");
+		criteria.setProjection(Projections.sum("quantity"));
+		criteria.add(Restrictions.eq("it.location", location));
+		criteria.add(Restrictions.eq("item", item));
+		Long result = (Long)criteria.uniqueResult();
+		if (result == null) {
+			result = new Long(0);
+		}
+		System.out.println(result);
+		return result.intValue();
+	}
+
+	@Override
+	public List<Item> listItemsByDrugId(final Integer drugid) {
+		Drug drug = Context.getConceptService().getDrug(drugid);
+		return listItemsByDrugId(drug);
+	}
+
+	@Override
+	public List<Item> listItemsByDrugId(final Drug drug) {
+		return executeCriteria(Item.class, new Action1<Criteria>() {
+			@Override
+			public void apply(Criteria criteria) {
+				locationRestrictionCheck(criteria);
+				criteria.add(Restrictions.eq(HibernateCriteriaConstants.DRUG, drug));
+			}
+		});
+	}
+
+	@Override
+	public Boolean dispenseItem(Integer id, Integer quantity) {
+		System.out.println("**start dispence item");
+		try {
+			Criteria itemcriteria = getRepository().createCriteria(Item.class);
+			itemcriteria.add(Restrictions.eq("id", id));
+			locationRestrictionCheck(itemcriteria);
+
+			Item item = (Item)itemcriteria.uniqueResult();
+
+			if (item == null) {
+				return false;
+			}
+
+			Criteria itemstockcriteria = getRepository().createCriteria(ItemStock.class);
+			itemstockcriteria.add(Restrictions.eq("item", item));
+			itemstockcriteria.add(Restrictions.gt("quantity", 0));
+			locationRestrictionCheck(itemstockcriteria);
+
+			List<ItemStock> itemstock = getRepository().select(ItemStock.class, itemstockcriteria);
+
+			if (itemstock.size() != 0) {
+				int algquantity = quantity;
+				//get total
+				int totalquantity = 0;
+				for (ItemStock itemlist : itemstock) {
+					totalquantity += itemlist.getQuantity();
+				}
+				//if total is to small to fill order return
+				if (totalquantity < quantity) {
+					return false;
+				}
+				//go through and decrease stock until total filled
+				for (ItemStock itemlist : itemstock) {
+					if (algquantity == 0) {
+						break;
+					}
+					if (itemlist.getQuantity() <= algquantity) {
+						int ammt = itemlist.getQuantity();
+						itemlist.setQuantity(0);
+						algquantity -= ammt;
+					} else {
+						itemlist.setQuantity(itemlist.getQuantity() - algquantity);
+						algquantity = 0;
+					}
+				}
+				//save items stock
+				for (ItemStock itemlist : itemstock) {
+					Context.getService(IItemStockDataService.class).save(itemlist);
+				}
+
+				System.out.println("**finish dispence item");
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception e) {
+			String stacktrace = "";
+			for (int i = 0; i < e.getStackTrace().length; i++) {
+				stacktrace += "\n" + e.getStackTrace()[i].toString();
+			}
+
+			LOG.warn(e.getMessage() + stacktrace);
+			System.out.println("**error finish dispence item");
+			return false;
+		}
 	}
 
 	@Override

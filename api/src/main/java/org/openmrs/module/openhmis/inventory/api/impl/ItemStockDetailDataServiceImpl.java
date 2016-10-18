@@ -18,9 +18,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.openmrs.Location;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.impl.BaseObjectDataServiceImpl;
@@ -78,35 +79,36 @@ public class ItemStockDetailDataServiceImpl
 			throw new IllegalArgumentException("The stockroom must be defined.");
 		}
 
-		// We cannot use a normal Criteria query here because criteria does not support a group by with a having statement
-		// so HQL it is!
+		// Because this is an aggregate query we cannot use the normal executeCriteria method and instead have to do it
+		// manually.
+		Criteria criteria = getRepository().createCriteria(ItemStockDetail.class);
+		criteria.createAlias("item", "i");
+		criteria.add(Restrictions.eq("stockroom", stockroom));
 
+		criteria.setProjection(Projections.projectionList().add(Projections.groupProperty("item"))
+		        .add(Projections.groupProperty("expiration")).add(Projections.sum("quantity")));
+
+		// Load the record count (for paging)
 		if (pagingInfo != null && pagingInfo.shouldLoadRecordCount()) {
-			// Load the record count (for paging)
-			String countHql = "select 1 "
-			        + "from ItemStockDetail as detail "
-			        + "where stockroom.id = " + stockroom.getId() + " "
-			        + "group by item, expiration "
-			        + "having sum(detail.quantity) <> 0";
-			Query countQuery = getRepository().createQuery(countHql);
+			// Because we're already doing a group by query, we can't just use the loadPagingTotal method.
 
-			Integer count = countQuery.list().size();
+			// This is horrible, it just executes the full query to get the count.
+			List countList = criteria.list();
+			Integer count = countList.size();
 
 			pagingInfo.setTotalRecordCount(count.longValue());
 			pagingInfo.setLoadRecordCount(false);
 		}
 
-		// Create the query and optionally add paging
-		String hql = "select i, detail.expiration, sum(detail.quantity) as sumQty "
-		        + "from ItemStockDetail as detail inner join detail.item as i "
-		        + "where detail.stockroom.id = " + stockroom.getId() + " "
-		        + "group by i, detail.expiration "
-		        + "having sum(detail.quantity) <> 0"
-		        + "order by i.name asc, detail.expiration asc";
-		Query query = getRepository().createQuery(hql);
-		query = this.createPagingQuery(pagingInfo, query);
+		// Add the ordering
+		criteria.addOrder(Order.asc("i.name"));
+		criteria.addOrder(Order.asc("expiration"));
 
-		List list = query.list();
+		// Add the paging stuff
+		criteria = this.createPagingCriteria(pagingInfo, criteria);
+
+		// Load the criteria into an untyped list
+		List list = criteria.list();
 
 		// Parse the aggregate query into an ItemStockSummary object
 		List<ItemStockSummary> results = new ArrayList<ItemStockSummary>(list.size());
@@ -119,21 +121,191 @@ public class ItemStockDetailDataServiceImpl
 			// If the expiration column is null it does not appear to be included in the row array
 			if (row.length == 2) {
 				summary.setExpiration(null);
-				Integer quantity = Ints.checkedCast((Long)row[1]);
-				// skip record if the sum of item stock quantities == 0
-				if (quantity != 0) {
-					summary.setQuantity(quantity);
-				} else {
-					continue;
-				}
+				summary.setQuantity(Ints.checkedCast((Long)row[1]));
 			} else {
 				summary.setExpiration((Date)row[1]);
-				Integer quantity = Ints.checkedCast((Long)row[2]);
-				if (quantity != 0) {
-					summary.setQuantity(quantity);
-				} else {
-					continue;
-				}
+				summary.setQuantity(Ints.checkedCast((Long)row[2]));
+			}
+
+			results.add(summary);
+		}
+
+		// We done.
+		return results;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_METADATA })
+	public List<ItemStockSummary> getItemStockSummaryByStockroom(final Stockroom stockroom,
+	        String itemQuery, PagingInfo pagingInfo) {
+		if (stockroom == null) {
+			throw new IllegalArgumentException("The stockroom must be defined.");
+		}
+
+		// Because this is an aggregate query we cannot use the normal executeCriteria method and instead have to do it
+		// manually.
+		Criteria criteria = getRepository().createCriteria(ItemStockDetail.class);
+		criteria.createAlias("item", "i");
+		criteria.add(Restrictions.eq("stockroom", stockroom));
+		criteria.add(Restrictions.like("i.name", "%" + itemQuery + "%"));
+		criteria.setProjection(Projections.projectionList().add(Projections.groupProperty("item"))
+		        .add(Projections.groupProperty("expiration")).add(Projections.sum("quantity")));
+
+		// Load the record count (for paging)
+		if (pagingInfo != null && pagingInfo.shouldLoadRecordCount()) {
+			// Because we're already doing a group by query, we can't just use the loadPagingTotal method.
+
+			// This is horrible, it just executes the full query to get the count.
+			List countList = criteria.list();
+			Integer count = countList.size();
+
+			pagingInfo.setTotalRecordCount(count.longValue());
+			pagingInfo.setLoadRecordCount(false);
+		}
+
+		// Add the ordering
+		criteria.addOrder(Order.asc("i.name"));
+		criteria.addOrder(Order.asc("expiration"));
+
+		// Add the paging stuff
+		criteria = this.createPagingCriteria(pagingInfo, criteria);
+
+		// Load the criteria into an untyped list
+		List list = criteria.list();
+
+		// Parse the aggregate query into an ItemStockSummary object
+		List<ItemStockSummary> results = new ArrayList<ItemStockSummary>(list.size());
+		for (Object obj : list) {
+			Object[] row = (Object[])obj;
+
+			ItemStockSummary summary = new ItemStockSummary();
+			summary.setItem((Item)row[0]);
+
+			// If the expiration column is null it does not appear to be included in the row array
+			if (row.length == 2) {
+				summary.setExpiration(null);
+				summary.setQuantity(Ints.checkedCast((Long)row[1]));
+			} else {
+				summary.setExpiration((Date)row[1]);
+				summary.setQuantity(Ints.checkedCast((Long)row[2]));
+			}
+
+			results.add(summary);
+		}
+
+		// We done.
+		return results;
+	}
+
+	@Override
+	public List<ItemStockSummary> getItemStockSummaryByLocation(Location location, PagingInfo pagingInfo) {
+
+		// Because this is an aggregate query we cannot use the normal executeCriteria method and instead have to do it
+		// manually.
+		Criteria criteria = getRepository().createCriteria(ItemStockDetail.class);
+		criteria.createAlias("item", "i");
+		criteria.createAlias("stockroom", "stroom");
+		criteria.add(Restrictions.eq("stroom.location", location));
+
+		criteria.setProjection(Projections.projectionList().add(Projections.groupProperty("item"))
+		        .add(Projections.groupProperty("expiration")).add(Projections.sum("quantity")));
+
+		// Load the record count (for paging)
+		if (pagingInfo != null && pagingInfo.shouldLoadRecordCount()) {
+			// Because we're already doing a group by query, we can't just use the loadPagingTotal method.
+
+			// This is horrible, it just executes the full query to get the count.
+			List countList = criteria.list();
+			Integer count = countList.size();
+
+			pagingInfo.setTotalRecordCount(count.longValue());
+			pagingInfo.setLoadRecordCount(false);
+		}
+
+		// Add the ordering
+		criteria.addOrder(Order.asc("i.name"));
+		criteria.addOrder(Order.asc("expiration"));
+
+		// Add the paging stuff
+		criteria = this.createPagingCriteria(pagingInfo, criteria);
+
+		// Load the criteria into an untyped list
+		List list = criteria.list();
+
+		// Parse the aggregate query into an ItemStockSummary object
+		List<ItemStockSummary> results = new ArrayList<ItemStockSummary>(list.size());
+		for (Object obj : list) {
+			Object[] row = (Object[])obj;
+
+			ItemStockSummary summary = new ItemStockSummary();
+			summary.setItem((Item)row[0]);
+
+			// If the expiration column is null it does not appear to be included in the row array
+			if (row.length == 2) {
+				summary.setExpiration(null);
+				summary.setQuantity(Ints.checkedCast((Long)row[1]));
+			} else {
+				summary.setExpiration((Date)row[1]);
+				summary.setQuantity(Ints.checkedCast((Long)row[2]));
+			}
+
+			results.add(summary);
+		}
+
+		// We done.
+		return results;
+	}
+
+	@Override
+	public List<ItemStockSummary> getItemStockSummaryByLocation(Location location, String itemQuery, PagingInfo pagingInfo) {
+		// Because this is an aggregate query we cannot use the normal executeCriteria method and instead have to do it
+		// manually.
+		Criteria criteria = getRepository().createCriteria(ItemStockDetail.class);
+		criteria.createAlias("item", "i");
+		criteria.createAlias("stockroom", "stroom");
+		criteria.add(Restrictions.eq("stroom.location", location));
+		criteria.add(Restrictions.like("i.name", "%" + itemQuery + "%"));
+		criteria.setProjection(Projections.projectionList().add(Projections.groupProperty("item"))
+		        .add(Projections.groupProperty("expiration")).add(Projections.sum("quantity")));
+
+		// Load the record count (for paging)
+		if (pagingInfo != null && pagingInfo.shouldLoadRecordCount()) {
+			// Because we're already doing a group by query, we can't just use the loadPagingTotal method.
+
+			// This is horrible, it just executes the full query to get the count.
+			List countList = criteria.list();
+			Integer count = countList.size();
+
+			pagingInfo.setTotalRecordCount(count.longValue());
+			pagingInfo.setLoadRecordCount(false);
+		}
+
+		// Add the ordering
+		criteria.addOrder(Order.asc("i.name"));
+		criteria.addOrder(Order.asc("expiration"));
+
+		// Add the paging stuff
+		criteria = this.createPagingCriteria(pagingInfo, criteria);
+
+		// Load the criteria into an untyped list
+		List list = criteria.list();
+
+		// Parse the aggregate query into an ItemStockSummary object
+		List<ItemStockSummary> results = new ArrayList<ItemStockSummary>(list.size());
+		for (Object obj : list) {
+			Object[] row = (Object[])obj;
+
+			ItemStockSummary summary = new ItemStockSummary();
+			summary.setItem((Item)row[0]);
+
+			// If the expiration column is null it does not appear to be included in the row array
+			if (row.length == 2) {
+				summary.setExpiration(null);
+				summary.setQuantity(Ints.checkedCast((Long)row[1]));
+			} else {
+				summary.setExpiration((Date)row[1]);
+				summary.setQuantity(Ints.checkedCast((Long)row[2]));
 			}
 
 			results.add(summary);

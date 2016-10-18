@@ -20,27 +20,35 @@ public enum StockOperationStatus {
 	/**
 	 * The operation is being created but has not yet been submitted.
 	 */
-	NEW(),
+	NEW(false),
 	/**
 	 * The operation has been requested but not yet started.
 	 */
-	REQUESTED(),
+	REQUESTED(false),
 	/**
 	 * The operation has been started and the associated items are being processed.
 	 */
-	PENDING(),
+	PENDING(true),
 	/**
 	 * The operation was cancelled and the pending transactions were reversed.
 	 */
-	CANCELLED(),
+	CANCELLED(true),
 	/**
 	 * The operation was completed and the pending transactions were applied.
 	 */
-	COMPLETED(),
+	COMPLETED(false),
 	/**
 	 * The operation was rolled back and all applied transactions were reversed.
 	 */
-	ROLLBACK();
+	ROLLBACK(false);
 
-	private StockOperationStatus() {}
+	boolean removedByAutoFinishOperation;
+
+	private StockOperationStatus(boolean r) {
+		removedByAutoFinishOperation = r;
+	}
+
+	public boolean getRemovedByAutoFinishOperation() {
+		return removedByAutoFinishOperation;
+	}
 }

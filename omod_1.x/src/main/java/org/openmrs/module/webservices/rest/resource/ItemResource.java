@@ -23,9 +23,13 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Concept;
+import org.openmrs.Drug;
+import org.openmrs.Location;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService;
+import org.openmrs.module.openhmis.inventory.api.IDepartmentDataService;
 import org.openmrs.module.openhmis.inventory.api.IItemDataService;
 import org.openmrs.module.openhmis.inventory.api.model.Item;
 import org.openmrs.module.openhmis.inventory.api.model.ItemAttribute;
@@ -33,15 +37,18 @@ import org.openmrs.module.openhmis.inventory.api.model.ItemCode;
 import org.openmrs.module.openhmis.inventory.api.model.ItemPrice;
 import org.openmrs.module.openhmis.inventory.web.ModuleRestConstants;
 import org.openmrs.module.webservices.rest.helper.Converter;
+import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
+import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
+import org.openmrs.util.OpenmrsConstants;
 
 /**
  * REST resource representing an {@link Item}.
@@ -56,13 +63,16 @@ public class ItemResource extends BaseRestSimpleCustomizableMetadataResource<Ite
 		description.addProperty("department", Representation.REF);
 		description.addProperty("hasExpiration");
 		description.addProperty("defaultExpirationPeriod");
+		description.addProperty("units");
 		description.addProperty("hasPhysicalInventory");
 		description.addProperty("minimumQuantity");
 
 		if (!(rep instanceof RefRepresentation)) {
 			description.addProperty("prices", Representation.REF);
 			description.addProperty("concept", Representation.REF);
+			description.addProperty("drug", Representation.REF);
 			description.addProperty("buyingPrice");
+			description.addProperty("buyingCurrency");
 		}
 
 		description.addProperty("defaultPrice", Representation.REF);
@@ -121,6 +131,23 @@ public class ItemResource extends BaseRestSimpleCustomizableMetadataResource<Ite
 		instance.setConcept(concept);
 	}
 
+	@PropertySetter(value = "drug")
+	public void setDrug(Item instance, final String uuid) {
+		System.out.println("drug input: " + uuid);
+		if (StringUtils.isBlank(uuid)) {
+			instance.setDrug(null);
+			return;
+		}
+
+		if (instance.getDrug() != null && uuid.equals(instance.getDrug().getUuid())) {
+			return;
+		}
+
+		ConceptService drugService = Context.getConceptService();
+		Drug drug = drugService.getDrugByUuid(uuid);
+		instance.setDrug(drug);
+	}
+
 	@PropertySetter(value = "buyingPrice")
 	public void setPrice(Item instance, Object price) {
 		if (price == null || price.equals("")) {
@@ -130,9 +157,33 @@ public class ItemResource extends BaseRestSimpleCustomizableMetadataResource<Ite
 		}
 	}
 
+	@PropertySetter(value = "buyingCurrency")
+	public void setCurrency(Item instance, final String currency) {
+
+		if (currency == null || currency.equals("")) {
+			instance.setBuyingCurrency(null);
+		} else {
+			instance.setBuyingCurrency(currency);
+		}
+
+	}
+
+	@Override
+	protected PageableResult doGetAll(RequestContext context) {
+		String loc = Context.getAuthenticatedUser().
+		        getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+		Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
+		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+		return new AlreadyPagedWithLength<Item>(context,
+		        Context.getService(IItemDataService.class).getItemsByLocation(
+		            ltemp, context.getIncludeAll(), pagingInfo),
+		        pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+	}
+
+	@Override
 	@PropertySetter("attributes")
 	public void setAttributes(Item instance, List<ItemAttribute> attributes) {
-		super.baseSetAttributes(instance, attributes);
+		super.setAttributes(instance, attributes);
 	}
 
 	@Override
@@ -151,7 +202,8 @@ public class ItemResource extends BaseRestSimpleCustomizableMetadataResource<Ite
 			public boolean apply(@Nullable ItemPrice itemPrice) {
 				if (itemPrice != null) {
 					String itemPriceName = itemPrice.getName();
-					if (itemPrice.getPrice().toPlainString().equals(price) && namesEqualOrBlank(itemPriceName, name)) {
+					if (itemPrice.getPrice().toPlainString().equals(price)
+					        && namesEqualOrBlank(itemPriceName, name)) {
 						return true;
 					}
 				}
