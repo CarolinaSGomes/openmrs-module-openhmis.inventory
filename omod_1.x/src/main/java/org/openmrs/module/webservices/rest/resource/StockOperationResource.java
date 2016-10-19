@@ -31,6 +31,7 @@ import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.Utility;
 import org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService;
 import org.openmrs.module.openhmis.commons.api.f.Action2;
+import org.openmrs.module.openhmis.inventory.ModuleSettings;
 import org.openmrs.module.openhmis.inventory.api.IItemDataService;
 import org.openmrs.module.openhmis.inventory.api.IStockOperationDataService;
 import org.openmrs.module.openhmis.inventory.api.IStockOperationService;
@@ -137,7 +138,6 @@ public class StockOperationResource
 
 	@Override
 	public StockOperation save(StockOperation operation) {
-		System.out.println("test stock operation submit");
 		// Ensure that the current user can process the operation
 		if (!userCanProcess(operation)) {
 			throw new RestClientException("The current user not authorized to process this operation.");
@@ -194,7 +194,6 @@ public class StockOperationResource
 
 	@PropertySetter("status")
 	public void setStatus(StockOperation operation, StockOperationStatus status) {
-		System.out.println("***status " + status.name());
 		if (operation.getStatus() != status) {
 			if (status == StockOperationStatus.ROLLBACK) {
 				rollbackRequired = true;
@@ -405,25 +404,26 @@ public class StockOperationResource
 			//todo find current total
 			//calculate if item is below minimum amount and show alert
 			//added via kmri 746
-
 			String loc = Context.getAuthenticatedUser().getUserProperty(
 			    OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
 			Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
 
 			int num = Context.getService(IItemDataService.class).getTotalItemByLocation(sourceItem, ltemp);
 			num += opItem.getQuantity();
-			System.out.println("checking alert " + num + " " + sourceItem.getMinimumQuantity());
 			if (sourceItem.getMinimumQuantity() != null && sourceItem.getMinimumQuantity().intValue() > num) {
 				//get all users by location
 				List<User> userlist = Context.getUserService().getAllUsers();
 				List<User> restricteduserlist = new ArrayList<User>();
-				for (User u : userlist) {
-					String userloc = u.getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
-					if (userloc.equals(loc)) {
-						restricteduserlist.add(u);
+				if (ModuleSettings.areItemsRestrictedByLocation()) {
+					for (User u : userlist) {
+						String userloc = u.getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+						if (userloc.equals(loc)) {
+							restricteduserlist.add(u);
+						}
 					}
+				} else {
+					restricteduserlist = userlist;
 				}
-				System.out.println("alert activated");
 				Context.getAlertService().saveAlert(new Alert("WARNING: Stock is below minimum for "
 				        + sourceItem.getName(), restricteduserlist));
 			}

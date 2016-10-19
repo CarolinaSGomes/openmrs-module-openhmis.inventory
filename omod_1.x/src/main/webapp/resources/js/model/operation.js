@@ -183,7 +183,6 @@ define(
 				    }
 
 				    if (resp.patient && _.isObject(resp.patient)) {
-				    	console.log("patient test 1");
 					    resp.patient = new openhmis.Patient(resp.patient);
 				    }
 
@@ -305,7 +304,6 @@ define(
                         resp.institution = new openhmis.Institution(resp.institution);
                     }
                     if (resp.patient) {
-                    	console.log("resp patient");
                         resp.patient = new openhmis.Patient(resp.patient);
                     }
                     if (resp.department) {
@@ -374,7 +372,6 @@ define(
                         var institution = this.get('institution');
                         var department = this.get('department');
                         var patient = this.get('patient');
-						console.log("pat "+patient);
                         // Either an institution, department, or patient must be defined
                         // cannot have more than one
                         // note the department validation has been disabled in kmri version

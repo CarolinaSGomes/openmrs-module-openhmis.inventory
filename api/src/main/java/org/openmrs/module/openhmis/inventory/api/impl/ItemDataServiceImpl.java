@@ -251,7 +251,6 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 	@Override
 	@Authorized({ PrivilegeConstants.VIEW_ITEMS })
 	public List<Item> getItemsByItemSearch(final ItemSearch itemSearch, final boolean getRetired, PagingInfo pagingInfo) {
-		System.out.println("search items with query retired and pageing");
 		if (itemSearch == null) {
 			throw new NullPointerException("The item search must be defined.");
 		} else if (itemSearch.getTemplate() == null) {
@@ -356,7 +355,6 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 		if (result == null) {
 			result = new Long(0);
 		}
-		System.out.println(result);
 		return result.intValue();
 	}
 
@@ -379,7 +377,6 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 
 	@Override
 	public Boolean dispenseItem(Integer id, Integer quantity) {
-		System.out.println("**start dispence item");
 		try {
 			Criteria itemcriteria = getRepository().createCriteria(Item.class);
 			itemcriteria.add(Restrictions.eq("id", id));
@@ -428,7 +425,6 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 					Context.getService(IItemStockDataService.class).save(itemlist);
 				}
 
-				System.out.println("**finish dispence item");
 				return true;
 			} else {
 				return false;
@@ -440,7 +436,6 @@ public class ItemDataServiceImpl extends BaseCustomizableMetadataDataServiceImpl
 			}
 
 			LOG.warn(e.getMessage() + stacktrace);
-			System.out.println("**error finish dispence item");
 			return false;
 		}
 	}

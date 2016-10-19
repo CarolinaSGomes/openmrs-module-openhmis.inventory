@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.search.BaseObjectTemplateSearch;
+import org.openmrs.module.openhmis.inventory.ModuleSettings;
 import org.openmrs.module.openhmis.inventory.api.IDepartmentDataService;
 import org.openmrs.module.openhmis.inventory.api.IItemDataService;
 import org.openmrs.module.openhmis.inventory.api.model.Department;
@@ -105,38 +106,23 @@ public class ItemSearchHandler
 			items = service.getItemsByItemSearch(search, pagingInfo);
 		}
 
-		/*
-		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getDepartment() == null) {
-				System.out.println(items.get(i).getName() + " " + "department null");
-			} else if (items.get(i).getDepartment().getLocation() == null) {
-				System.out.println(items.get(i).getName() + " " + "location null");
-			} else {
-				System.out.println(items.get(i).getName() + " " + items.get(i).getDepartment().getLocation().getName());
+		if (ModuleSettings.areItemsRestrictedByLocation()) {
+			items = filterItemsByLocation(items, Integer.parseInt(userlocation));
+			int numresults = items.size();
+			for (int i = 1; i < context.getStartIndex().intValue(); i++) {
+				items.remove(0);
 			}
+			while (items.size() > context.getLimit().intValue()) {
+				items.remove(context.getLimit().intValue());
+			}
+			int page = (int)(context.getStartIndex().intValue() / context.getLimit().intValue() + 1);
+			boolean hasmoreresults = (page * context.getLimit().intValue()) < items.size();
+
+			return new AlreadyPagedWithLength<Item>(context, items, hasmoreresults, numresults);
+		} else {
+			return new AlreadyPagedWithLength<Item>(context, items, pagingInfo.hasMoreResults(),
+			        pagingInfo.getTotalRecordCount());
 		}
-		*/
-
-		items = filterItemsByLocation(items, Integer.parseInt(userlocation));
-		int numresults = items.size();
-
-		for (int i = 1; i < context.getStartIndex().intValue(); i++) {
-			items.remove(0);
-		}
-
-		while (items.size() > context.getLimit().intValue()) {
-			items.remove(context.getLimit().intValue());
-		}
-
-		int page = (int)(context.getStartIndex().intValue() / context.getLimit().intValue() + 1);
-		boolean hasmoreresults = (page * context.getLimit().intValue()) < items.size();
-
-		/*
-		return new AlreadyPagedWithLength<Item>(context, items, pagingInfo.hasMoreResults(),
-		        pagingInfo.getTotalRecordCount());
-		*/
-
-		return new AlreadyPagedWithLength<Item>(context, items, hasmoreresults, numresults);
 	}
 
 	public List<Item> filterItemsByLocation(List<Item> item, int location) {

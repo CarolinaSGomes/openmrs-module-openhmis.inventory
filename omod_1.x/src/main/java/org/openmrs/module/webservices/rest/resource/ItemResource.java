@@ -134,7 +134,6 @@ public class ItemResource extends BaseRestSimpleCustomizableMetadataResource<Ite
 
 	@PropertySetter(value = "drug")
 	public void setDrug(Item instance, final String uuid) {
-		System.out.println("drug input: " + uuid);
 		if (StringUtils.isBlank(uuid)) {
 			instance.setDrug(null);
 			return;

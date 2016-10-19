@@ -84,7 +84,6 @@ define(
 						options.queryString = openhmis.addQueryStringParameter(
 							options.queryString, filter + "=" + encodeURIComponent(this.searchFilter[filter]));
 				}
-				console.log(options);
 				return options;
 			},
 
@@ -159,7 +158,6 @@ define(
 				options = options ? options : {}
 				if (this.searchFilter) {
 					for (var filter in this.searchFilter){
-						console.log(filter);
 						if (filter == "q") {
 							options.queryString = openhmis.addQueryStringParameter(
                                	options.queryString, filter + "=" + $("#q").val()
@@ -172,7 +170,6 @@ define(
 
                 	}
 				}
-				console.log(options);
 				return options;
 			},
 
@@ -443,7 +440,6 @@ define(
 
             commitForm: function() {
                 var filters = this.form.getValue();
-				console.log(filters);
                 if (!filters.operation_status) {
                     this.searchFilter = undefined;
                 } else {
