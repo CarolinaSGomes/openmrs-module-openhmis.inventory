@@ -16,6 +16,7 @@ define(
 		openhmis.url.backboneBase + 'js/openhmis',
 		openhmis.url.backboneBase + 'js/lib/i18n',
 		openhmis.url.backboneBase + 'js/model/generic',
+		openhmis.url.backboneBase + 'js/model/location'
 	],
 	function(openhmis, __) {
 		openhmis.Department = openhmis.GenericModel.extend({
@@ -28,11 +29,21 @@ define(
 
 			schema: {
 				name: 'Text',
+				location: {
+                	type: 'LocationSelectMod',
+                	options: new openhmis.GenericCollection(null, {
+                		 model: openhmis.LocationEdit,
+                		 //location restriction
+                		 url: ($('.locationRestriction').val() == 'true' ? 'v2/inventory/location' : 'v1/location')
+                	}),
+                	objRef: true
+                },
 				description: 'Text'
 			},
 
 			validate: function(attrs, options) {
 				if (!attrs.name) return { name: __(openhmis.getMessage('openhmis.inventory.nameRequiredError')) };
+				if (!attrs.location) return { location: __(openhmis.getMessage('openhmis.inventory.locationRequiredError')) };
 				return null;
 			},
 

@@ -17,6 +17,7 @@ import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService;
+import org.openmrs.module.openhmis.inventory.ModuleSettings;
 import org.openmrs.module.openhmis.inventory.api.IStockroomDataService;
 import org.openmrs.module.openhmis.inventory.api.model.Stockroom;
 import org.openmrs.module.openhmis.inventory.web.ModuleRestConstants;
@@ -61,14 +62,19 @@ public class StockroomResource extends BaseRestMetadataResource<Stockroom> {
 	 */
 	@Override
 	protected PageableResult doGetAll(RequestContext context) {
-		String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
-		Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
-		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+		if (ModuleSettings.areItemsRestrictedByLocation()) {
+			//kmri location restriction
+			String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+			Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
+			PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 
-		return new AlreadyPagedWithLength<Stockroom>(context,
-		        Context.getService(IStockroomDataService.class).getStockroomsByLocation(
-		            ltemp, context.getIncludeAll(), pagingInfo),
-		        pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+			return new AlreadyPagedWithLength<Stockroom>(context,
+			        Context.getService(IStockroomDataService.class).getStockroomsByLocation(
+			            ltemp, context.getIncludeAll(), pagingInfo),
+			        pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+		} else {
+			return super.doGetAll(context);
+		}
 	}
 
 	@Override

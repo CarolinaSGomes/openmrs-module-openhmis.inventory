@@ -45,7 +45,6 @@ public class InventoryResourceController extends MainResourceController {
 	@RequestMapping(value = "location", method = RequestMethod.GET)
 	@ResponseBody
 	public String getLocations(ModelMap model) throws IOException {
-		System.out.println("location controller call");
 		List<Location> locationlist = new ArrayList<Location>();
 
 		String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
@@ -60,7 +59,15 @@ public class InventoryResourceController extends MainResourceController {
 				output += ",";
 			}
 			output += "{\"display\":\"" + locationlist.get(i).getName()
-			        + "\",\"uuid\":\"" + locationlist.get(i).getUuid() + "\"}";
+			        + "\",\"uuid\":\"" + locationlist.get(i).getUuid() + "\"";
+			output +=
+			        ",\"links\":["
+			                + "{\"rel\":\"self\"," + "\"uri\":\"/openmrs/ws/rest/v2/inventory/location/" + ltemp.getUuid()
+			                + "\"" + "}"
+			                + ",{\"rel\":\"full\"," + "\"uri\":\"/openmrs/ws/rest/v2/inventory/location/" + ltemp.getUuid()
+			                + "?v=full\"" + "}"
+			                + "]";
+			output += "}";
 		}
 		output += "]}";
 

@@ -65,6 +65,7 @@ public class JasperReportController extends ReportsControllerBase {
 	}
 
 	private String renderStockLowReport(int reportId, WebRequest request, HttpServletResponse response) throws IOException {
+		//kmri report must be location restricted
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
 		Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));

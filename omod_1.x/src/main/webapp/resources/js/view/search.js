@@ -232,6 +232,7 @@ define(
 				openhmis.BaseSearchView.prototype.initialize.call(this, options);
 				var locationCollection = new openhmis.GenericCollection([], {
 					//changed due to kmri 985
+					//location restriction
 					//model: openhmis.Location
                     model: openhmis.LocationEdit,
                     limit: openhmis.rest.maxResults

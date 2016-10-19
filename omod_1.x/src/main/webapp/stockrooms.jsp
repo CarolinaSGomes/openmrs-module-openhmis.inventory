@@ -12,6 +12,7 @@
 <openmrs:htmlInclude file='<%= ModuleWebConstants.MODULE_RESOURCE_ROOT + "js/screen/stockrooms.js" %>' />
 
 <%@ include file="template/linksHeader.jsp"%>
+<input type=hidden class="locationRestriction" value="${locationRestriction}"/>
 <h2>
     <spring:message code="openhmis.inventory.admin.stockrooms" />
 </h2>

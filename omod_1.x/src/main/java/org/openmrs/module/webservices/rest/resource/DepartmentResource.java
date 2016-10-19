@@ -18,6 +18,7 @@ import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService;
+import org.openmrs.module.openhmis.inventory.ModuleSettings;
 import org.openmrs.module.openhmis.inventory.api.IDepartmentDataService;
 import org.openmrs.module.openhmis.inventory.api.IStockroomDataService;
 import org.openmrs.module.openhmis.inventory.api.model.Department;
@@ -41,26 +42,27 @@ public class DepartmentResource extends BaseRestMetadataResource<Department> {
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+		description.addProperty("location", Representation.REF);
 		description.addProperty("description", Representation.REF);
 
 		return description;
 	}
 
-	/*
-	 * would like to restrict departments via location.
-	 * will be hard given there is no association between department and location.
-	 */
-
 	@Override
 	protected PageableResult doGetAll(RequestContext context) {
-		String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
-		Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
-		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+		if (ModuleSettings.areItemsRestrictedByLocation()) {
+			//kmri location restrictions
+			String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+			Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
+			PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 
-		return new AlreadyPagedWithLength<Department>(context,
-		        Context.getService(IDepartmentDataService.class).getDepartmentsByLocation(
-		            ltemp, context.getIncludeAll(), pagingInfo),
-		        pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+			return new AlreadyPagedWithLength<Department>(context,
+			        Context.getService(IDepartmentDataService.class).getDepartmentsByLocation(
+			            ltemp, context.getIncludeAll(), pagingInfo),
+			        pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+		} else {
+			return super.doGetAll(context);
+		}
 	}
 
 	@Override

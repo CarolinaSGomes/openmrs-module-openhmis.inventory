@@ -30,12 +30,12 @@ define(
 			schema: {
 				name: { type: 'Text' },
 				location: {
-					type: 'LocationSelect',
+					type: 'LocationSelectMod',
 					options: new openhmis.GenericCollection(null, {
 						model: openhmis.LocationEdit,
 						//kmri 985
-						//url: 'v1/location'
-						url: 'v2/inventory/location'
+						//location restriction
+						url: ($('.locationRestriction').val() == 'true' ? 'v2/inventory/location' : 'v1/location')
 					}),
 					objRef: true
 				}
@@ -63,8 +63,8 @@ define(
 		openhmis.LocationEdit = openhmis.Location.extend({
 			meta: {
 				//kmri 985
-				//restUrl: 'v1/location'
-				restUrl: 'v2/inventory/location'
+				//location restriction
+				restUrl: ($('.locationRestriction').val() == 'true' ? 'v2/inventory/location' : 'v1/location')
 			}
 		}),
 

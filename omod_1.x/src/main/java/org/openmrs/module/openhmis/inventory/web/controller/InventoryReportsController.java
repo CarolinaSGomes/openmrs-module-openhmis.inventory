@@ -79,9 +79,14 @@ public class InventoryReportsController {
 		model.addAttribute("showStockTakeLink", Context.getAuthenticatedUser() != null
 		        && WellKnownOperationTypes.getAdjustment().userCanProcess(Context.getAuthenticatedUser()));
 
-		String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
-		Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
-		model.addAttribute("stockrooms", stockroomDataService.getStockroomsByLocation(ltemp, false));
+		if (ModuleSettings.areItemsRestrictedByLocation()) {
+			String loc = Context.getAuthenticatedUser().getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+			Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
+
+			model.addAttribute("stockrooms", stockroomDataService.getStockroomsByLocation(ltemp, false));
+		} else {
+			model.addAttribute("stockrooms", stockroomDataService.getAll());
+		}
 		model.addAttribute("AutoCompleteOperations", ModuleSettings.loadSettings().getAutoCompleteOperations());
 	}
 

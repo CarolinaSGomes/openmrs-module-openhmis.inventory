@@ -29,6 +29,7 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.openhmis.commons.api.PagingInfo;
 import org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService;
+import org.openmrs.module.openhmis.inventory.ModuleSettings;
 import org.openmrs.module.openhmis.inventory.api.IDepartmentDataService;
 import org.openmrs.module.openhmis.inventory.api.IItemDataService;
 import org.openmrs.module.openhmis.inventory.api.model.Item;
@@ -170,14 +171,19 @@ public class ItemResource extends BaseRestSimpleCustomizableMetadataResource<Ite
 
 	@Override
 	protected PageableResult doGetAll(RequestContext context) {
-		String loc = Context.getAuthenticatedUser().
-		        getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
-		Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
-		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
-		return new AlreadyPagedWithLength<Item>(context,
-		        Context.getService(IItemDataService.class).getItemsByLocation(
-		            ltemp, context.getIncludeAll(), pagingInfo),
-		        pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+		if (ModuleSettings.areItemsRestrictedByLocation()) {
+			//kmri location restrictions
+			String loc = Context.getAuthenticatedUser().
+			        getUserProperty(OpenmrsConstants.USER_PROPERTY_DEFAULT_LOCATION);
+			Location ltemp = Context.getLocationService().getLocation(Integer.parseInt(loc));
+			PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+			return new AlreadyPagedWithLength<Item>(context,
+			        Context.getService(IItemDataService.class).getItemsByLocation(
+			            ltemp, context.getIncludeAll(), pagingInfo),
+			        pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+		} else {
+			return super.doGetAll(context);
+		}
 	}
 
 	@Override

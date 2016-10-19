@@ -30,6 +30,63 @@ define(
     function ($, Backbone, _, openhmis) {
         var editors = Backbone.Form.editors;
 
+		//kmri modification
+		//needed to modify location select because reorderLocations wasn't working
+        editors.LocationSelectMod = editors.LocationSelect.extend({
+			reorderLocations: function(locationModels) {
+				var cur = this;
+				var reorderedLocations = new Backbone.Collection();
+
+				if(locationModels !== null && locationModels !== undefined
+						&& locationModels.length > 0) {
+					var rootLocations = new Backbone.Collection();
+
+					//look through all locations and pick out the root locations
+					for(i = 0; i < locationModels.length; i++) {
+						var location = locationModels[i];
+
+						if(location !== null && location !== undefined) {
+							//loads the location model with all its properties
+							location.fetch({async:false, success: function(fetchedLocation) {
+								//true means fecthedLoc is a root location
+								if(fetchedLocation !== null && fetchedLocation !== undefined &&
+										(fetchedLocation.get("parentLocation") === null ||
+												fetchedLocation.get("parentLocation") === undefined)) {
+									rootLocations.add(location);
+								}
+							}});
+						}
+					}
+
+					if(rootLocations.length > 0) {
+						//for each root location, walk through the location tree
+						for(i = 0; i < rootLocations.models.length; i++) {
+							var rootLoc = rootLocations.models[i];
+
+							//kmri modification
+							//added rootLoc.get("links") != null
+							//todo move modification to backboneforms
+							if(rootLoc !== null && rootLoc !== undefined && rootLoc.get("links") != null) {
+								var locationModel = cur.createLocationModel(rootLoc.get("display"),
+										rootLoc.get("uuid"), rootLoc.get("links")[0].uri);
+
+								reorderedLocations.add(locationModel);
+								cur.loadChildLocations(rootLoc, cur, reorderedLocations, 0);
+							}
+						}
+					}
+
+					if(reorderedLocations.models.length === locationModels.length) {
+						return reorderedLocations.models;
+					} else {
+						return locationModels;
+					}
+				} else {
+					return locationModels;
+				}
+			}
+        });
+
         editors.DepartmentSelect = editors.GenericModelSelect.extend({
             modelType: openhmis.Department,
             displayAttr: "name"

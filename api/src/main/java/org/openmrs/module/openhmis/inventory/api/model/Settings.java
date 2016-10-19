@@ -21,6 +21,7 @@ public class Settings {
 
 	private Boolean autoGenerateOperationNumber;
 	private Boolean autoCompleteOperations;
+	private Boolean locationRestrictions;
 	private Integer operationNumberGeneratorSourceId;
 	private Integer stockLowReportId;
 	private Integer stockTakeReportId;
@@ -35,6 +36,14 @@ public class Settings {
 
 	public void setAutoGenerateOperationNumber(Boolean autoGenerateOperationNumber) {
 		this.autoGenerateOperationNumber = autoGenerateOperationNumber;
+	}
+
+	public Boolean getLocationRestrictions() {
+		return locationRestrictions;
+	}
+
+	public void setLocationRestrictions(Boolean locationRestrictions) {
+		this.locationRestrictions = locationRestrictions;
 	}
 
 	public Boolean getAutoCompleteOperations() {

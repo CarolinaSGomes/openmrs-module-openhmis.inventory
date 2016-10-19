@@ -128,6 +128,13 @@ public class ModuleSettings {
 			settings.setAutoCompleteOperations(false);
 		}
 
+		prop = adminService.getGlobalProperty(RESTRICT_INVENTORY_ITEMS_BY_LOCATION);
+		if (!StringUtils.isEmpty(prop)) {
+			settings.setLocationRestrictions(Boolean.parseBoolean(prop));
+		} else {
+			settings.setLocationRestrictions(false);
+		}
+
 		return settings;
 	}
 
@@ -198,6 +205,13 @@ public class ModuleSettings {
 			adminService.setGlobalProperty(AUTO_COMPLETE_OPERATIONS_PROPERTY, Boolean.TRUE.toString());
 		} else {
 			adminService.setGlobalProperty(AUTO_COMPLETE_OPERATIONS_PROPERTY, Boolean.FALSE.toString());
+		}
+
+		Boolean locationRestrictions = settings.getLocationRestrictions();
+		if (Boolean.TRUE.equals(locationRestrictions)) {
+			adminService.setGlobalProperty(RESTRICT_INVENTORY_ITEMS_BY_LOCATION, Boolean.TRUE.toString());
+		} else {
+			adminService.setGlobalProperty(RESTRICT_INVENTORY_ITEMS_BY_LOCATION, Boolean.FALSE.toString());
 		}
 	}
 
